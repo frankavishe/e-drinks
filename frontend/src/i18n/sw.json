@@ -1,0 +1,29 @@
+{
+  "brand": "e-drinks",
+  "tagline": "Vinywaji kwa harusi na sherehe, Dar es Salaam",
+  "nav": {
+    "home": "Nyumbani",
+    "packages": "Vifurushi",
+    "gallery": "Picha",
+    "faq": "Maswali",
+    "planners": "Kwa Waandaaji",
+    "contact": "Mawasiliano",
+    "book": "Weka oda",
+    "track": "Fuatilia oda",
+    "login": "Ingia"
+  },
+  "home": {
+    "title": "Vinywaji vya sherehe yako, vinaletwa ukumbini",
+    "lead": "Soda, maji, bia, divai na pombe kali kwa jumla — pamoja na majokofu ya barafu na wahudumu.",
+    "cta": "Pata bei sasa"
+  },
+  "login": {
+    "title": "Ingia",
+    "email": "Barua pepe",
+    "password": "Nenosiri",
+    "submit": "Ingia",
+    "error": "Imeshindikana kuingia. Hakikisha barua pepe na nenosiri.",
+    "notConfigured": "Supabase bado haijawekwa (VITE_SUPABASE_URL)."
+  },
+  "comingSoon": "Inakuja hivi karibuni"
+}

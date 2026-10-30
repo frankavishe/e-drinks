@@ -1,0 +1,29 @@
+{
+  "brand": "e-drinks",
+  "tagline": "Drinks for weddings and events in Dar es Salaam",
+  "nav": {
+    "home": "Home",
+    "packages": "Packages",
+    "gallery": "Gallery",
+    "faq": "FAQ",
+    "planners": "For Planners",
+    "contact": "Contact",
+    "book": "Book now",
+    "track": "Track booking",
+    "login": "Log in"
+  },
+  "home": {
+    "title": "Drinks for your event, delivered to the venue",
+    "lead": "Soft drinks, water, beer, wine and spirits in bulk — with ice coolers and drink servers.",
+    "cta": "Get a quote"
+  },
+  "login": {
+    "title": "Log in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Log in",
+    "error": "Login failed. Check your email and password.",
+    "notConfigured": "Supabase is not configured yet (VITE_SUPABASE_URL)."
+  },
+  "comingSoon": "Coming soon"
+}
