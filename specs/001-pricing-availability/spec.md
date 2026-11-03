@@ -152,7 +152,8 @@ A customer whose venue area is not on the list can still get a quote; delivery i
   counts when short.
 - **FR-008**: System MUST flag rush when the event is closer than the notice days (the server
   notice value if servers are included), read from settings.
-- **FR-009**: System MUST flag quotes below the minimum order setting.
+- **FR-009**: System MUST flag quotes whose drinks + add-ons amount (excluding delivery and the
+  refundable empties deposit) is below the minimum order setting.
 - **FR-010**: System MUST expose quoting publicly (no login) along with the catalog, packages,
   zones/areas and add-ons needed to build a quote.
 - **FR-011**: Public quote and catalog responses MUST NOT expose cost prices or margins.
