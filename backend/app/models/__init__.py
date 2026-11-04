@@ -2,6 +2,7 @@ from app.models.booking import (
     BOOKING_STATUSES,
     Booking,
     BookingAddon,
+    BookingCounter,
     BookingItem,
     BookingStatusHistory,
     Commission,
@@ -26,7 +27,7 @@ from app.models.catalog import (
 )
 
 __all__ = [
-    "BOOKING_STATUSES", "Addon", "Area", "Booking", "BookingAddon", "BookingItem",
+    "BOOKING_STATUSES", "Addon", "Area", "Booking", "BookingAddon", "BookingCounter", "BookingItem",
     "BookingStatusHistory", "Commission", "Customer", "GalleryImage", "Package", "PackageRule",
     "Payment", "PriceTier", "Product", "Profile", "PurchaseNeed", "Setting", "StockLevel",
     "StockMovement", "Venue", "Zone",

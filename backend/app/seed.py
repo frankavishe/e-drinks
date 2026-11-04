@@ -32,6 +32,7 @@ SETTINGS = {
     "vrn": "",
     "phone": "+255 700 000 000",
     "email": "",
+    "notification_email": "",
     "whatsapp_number": "255700000000",
     "min_order": "300000",
     "notice_days": "3",

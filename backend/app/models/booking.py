@@ -7,6 +7,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     String,
@@ -14,6 +15,7 @@ from sqlalchemy import (
     Time,
     Uuid,
     func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -51,8 +53,17 @@ class Customer(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(120))
-    phone: Mapped[str] = mapped_column(String(30), index=True)
+    phone: Mapped[str] = mapped_column(String(30), unique=True, index=True)  # 255XXXXXXXXX
     email: Mapped[str] = mapped_column(String(200), default="")
+
+
+class BookingCounter(Base):
+    """Last booking number issued per year, for ED-YYYY-NNNN."""
+
+    __tablename__ = "booking_counters"
+
+    year: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=False)
+    last_no: Mapped[int] = mapped_column(Integer)
 
 
 class Booking(Base):
@@ -157,8 +168,22 @@ class BookingStatusHistory(Base):
     booking: Mapped[Booking] = relationship(back_populates="history")
 
 
+_LIVE_REFERENCE = "reference <> '' AND status <> 'rejected'"
+
+
 class Payment(Base):
     __tablename__ = "payments"
+    __table_args__ = (
+        # A reference counts once per booking, even for a double-tap; rejected ones may be retried.
+        Index(
+            "uq_payments_booking_reference",
+            "booking_id",
+            "reference",
+            unique=True,
+            postgresql_where=text(_LIVE_REFERENCE),
+            sqlite_where=text(_LIVE_REFERENCE),
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     booking_id: Mapped[int] = mapped_column(ForeignKey("bookings.id", ondelete="CASCADE"))

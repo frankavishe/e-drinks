@@ -21,8 +21,10 @@ def test_rls_migration_covers_every_table():
     import importlib.util
     from pathlib import Path
 
-    path = next(Path(__file__).parent.parent.glob("alembic/versions/*_base_schema.py"))
-    spec = importlib.util.spec_from_file_location("base_schema", path)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    assert set(mod.TABLES) == set(Base.metadata.tables)
+    covered = set()
+    for path in Path(__file__).parent.parent.glob("alembic/versions/*.py"):
+        spec = importlib.util.spec_from_file_location(path.stem, path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        covered |= set(getattr(mod, "TABLES", ()))
+    assert covered == set(Base.metadata.tables)
