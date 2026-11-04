@@ -21,18 +21,18 @@ run it and see it fail, then implement.
 
 ## Phase 1: Setup
 
-- [ ] T001 Create empty modules `backend/app/schemas/__init__.py`, `backend/app/schemas/public.py`, `backend/app/routers/public.py`; run `pytest` to confirm the Phase-1 suite is green before starting
+- [X] T001 Create empty modules `backend/app/schemas/__init__.py`, `backend/app/schemas/public.py`, `backend/app/routers/public.py`; run `pytest` to confirm the Phase-1 suite is green before starting
 
 ---
 
 ## Phase 2: Foundational (blocks all stories)
 
-- [ ] T002 [P] Test-first: `backend/tests/test_settings_store.py`, which reads the seeded settings as typed ints (min_order, notice_days, notice_days_servers, deposit_percent, balance_due_days), with defaults when a key is missing
-- [ ] T003 Implement `backend/app/services/settings_store.py`: `async load_pricing_settings(session) -> PricingSettings`
-- [ ] T004 Define dataclasses in `backend/app/services/pricing.py`: ProductInfo, PackageInfo, AddonInfo, PricingSettings, QuoteRequest, QuoteLine, AddonLine, Quote, plus `QuoteError`/`CatalogError` (per data-model.md)
-- [ ] T005 Test-first: `backend/tests/test_catalog_loader.py`. Load the seeded catalog into dataclasses; inactive products/packages/add-ons are excluded; no cost field exists on ProductInfo
-- [ ] T006 Implement `backend/app/services/catalog_loader.py` (products with tiers, packages with rules, add-ons, area→zone fee lookup)
-- [ ] T007 Add a `seeded_session` fixture to `backend/tests/conftest.py` that runs `app.seed.seed(session)` on SQLite, plus an httpx `AsyncClient` fixture that overrides `get_session`
+- [X] T002 [P] Test-first: `backend/tests/test_settings_store.py`, which reads the seeded settings as typed ints (min_order, notice_days, notice_days_servers, deposit_percent, balance_due_days), with defaults when a key is missing
+- [X] T003 Implement `backend/app/services/settings_store.py`: `async load_pricing_settings(session) -> PricingSettings`
+- [X] T004 Define dataclasses in `backend/app/services/pricing.py`: ProductInfo, PackageInfo, AddonInfo, PricingSettings, QuoteRequest, QuoteLine, AddonLine, Quote, plus `QuoteError`/`CatalogError` (per data-model.md)
+- [X] T005 Test-first: `backend/tests/test_catalog_loader.py`. Load the seeded catalog into dataclasses; inactive products/packages/add-ons are excluded; no cost field exists on ProductInfo
+- [X] T006 Implement `backend/app/services/catalog_loader.py` (products with tiers, packages with rules, add-ons, area→zone fee lookup)
+- [X] T007 Add a `seeded_session` fixture to `backend/tests/conftest.py` that runs `app.seed.seed(session)` on SQLite, plus an httpx `AsyncClient` fixture that overrides `get_session`
 
 **Checkpoint**: settings and catalog load into plain types; pricing can be built as pure functions.
 
