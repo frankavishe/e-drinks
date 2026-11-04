@@ -1,8 +1,11 @@
 """Public endpoints on the seeded SQLite catalog; expected figures are hand-calculated."""
 
-from datetime import date, timedelta
+from datetime import datetime, time, timedelta, timezone
 
 import pytest
+
+from app.models import Setting
+from app.services.availability import today_eat
 
 FAR_AHEAD = 30
 
@@ -37,7 +40,7 @@ async def ids(client):
 
 
 def body(ids, days=FAR_AHEAD, **overrides):
-    event = date.today() + timedelta(days=days)
+    event = today_eat() + timedelta(days=days)
     values = {
         "event_date": event.isoformat(),
         "hours": 5,
@@ -127,7 +130,7 @@ async def test_silver_quote_matches_hand_calculation(client, ids):
     assert q["empties_deposit"] == 306000
     assert q["total"] == 1716500
     assert q["deposit_due"] == 858250
-    event = date.today() + timedelta(days=FAR_AHEAD)
+    event = today_eat() + timedelta(days=FAR_AHEAD)
     assert q["balance_due_date"] == (event - timedelta(days=3)).isoformat()
     assert q["flags"]["min_order"] == 300000
     assert_no_cost(q)
@@ -248,3 +251,115 @@ async def test_collection_must_follow_setup(client, ids, hours_later):
         ),
     )
     assert res.status_code == 422
+
+
+# --- T021: add-ons through the API -----------------------------------------------------------
+
+
+async def test_silver_with_coolers_matches_hand_calculation(client, ids):
+    res = await client.post(
+        "/public/quote", json=body(ids, addons=[{"addon_id": ids["addons"]["cooler"], "qty": 6}])
+    )
+    assert res.status_code == 200
+    q = res.json()
+    assert q["addons_total"] == 90000
+    assert q["total"] == 1806500
+    assert q["deposit_due"] == 903250
+    assert q["addon_lines"][0]["available"] == 20
+    assert q["addon_lines"][0]["ok"] is True
+    assert_no_cost(q)
+
+
+async def test_asking_for_more_coolers_than_owned_is_flagged(client, ids):
+    cooler = ids["addons"]["cooler"]
+    res = await client.post("/public/quote", json=body(ids, addons=[{"addon_id": cooler, "qty": 21}]))
+    assert res.status_code == 200
+    q = res.json()
+    assert (q["addon_lines"][0]["ok"], q["addon_lines"][0]["available"]) == (False, 20)
+    assert q["flags"]["addons_unavailable"] == [cooler]
+
+
+async def test_confirmed_booking_reduces_what_a_quote_can_offer(client, seeded_session, ids):
+    from app.models import Booking, BookingAddon, Customer
+
+    cooler = ids["addons"]["cooler"]
+    event = today_eat() + timedelta(days=FAR_AHEAD)
+    noon = datetime(event.year, event.month, event.day, 12, tzinfo=timezone.utc)  # 15:00 EAT
+    seeded_session.add(Customer(id=1, name="Asha", phone="255700000001"))
+    seeded_session.add(
+        Booking(
+            code="ED-2026-0001",
+            customer_id=1,
+            event_type="wedding",
+            event_date=event,
+            start_time=time(15),
+            hours=5,
+            guests=100,
+            setup_at=noon,
+            collect_at=noon + timedelta(hours=6),
+            status="confirmed",
+            addons=[BookingAddon(addon_id=cooler, qty=18, unit_price=15000)],
+        )
+    )
+    await seeded_session.commit()
+
+    res = await client.post("/public/quote", json=body(ids, addons=[{"addon_id": cooler, "qty": 3}]))
+    line = res.json()["addon_lines"][0]
+    assert (line["ok"], line["available"]) == (False, 2)
+    res = await client.post("/public/quote", json=body(ids, addons=[{"addon_id": cooler, "qty": 2}]))
+    assert res.json()["addon_lines"][0]["ok"] is True
+
+
+async def test_unknown_addon_is_422(client, ids):
+    res = await client.post("/public/quote", json=body(ids, addons=[{"addon_id": 99999, "qty": 1}]))
+    assert res.status_code == 422
+    assert "99999" in res.json()["detail"]
+
+
+# --- T023: rush and settings -----------------------------------------------------------------
+
+
+async def is_rush_for(client, ids, days, kinds=()):
+    addons = [{"addon_id": ids["addons"][kind], "qty": 1} for kind in kinds]
+    res = await client.post("/public/quote", json=body(ids, days=days, addons=addons))
+    assert res.status_code == 200
+    return res.json()["flags"]["is_rush"]
+
+
+async def test_rush_examples_from_the_spec(client, ids):
+    assert await is_rush_for(client, ids, 2) is True
+    assert await is_rush_for(client, ids, 5) is False
+    assert await is_rush_for(client, ids, 5, ["server"]) is True
+    assert await is_rush_for(client, ids, 8, ["server"]) is False
+
+
+async def test_bartender_needs_the_staff_notice(client, ids):
+    assert await is_rush_for(client, ids, 5, ["bartender"]) is True
+    assert await is_rush_for(client, ids, 5, ["cooler", "ice"]) is False
+
+
+async def test_event_today_is_allowed_and_rush(client, ids):
+    assert await is_rush_for(client, ids, 0) is True
+
+
+async def test_past_event_date_is_422(client, ids):
+    res = await client.post("/public/quote", json=body(ids, days=-1))
+    assert res.status_code == 422
+    assert "past" in res.json()["detail"]
+
+
+async def test_changing_notice_days_changes_the_next_quote(client, seeded_session, ids):
+    assert await is_rush_for(client, ids, 5) is False
+    (await seeded_session.get(Setting, "notice_days")).value = "6"
+    await seeded_session.commit()
+    assert await is_rush_for(client, ids, 5) is True
+
+
+async def test_changing_min_order_changes_the_next_quote(client, seeded_session, ids):
+    res = await client.post("/public/quote", json=custom_body(ids))
+    assert res.json()["flags"]["below_minimum"] is False
+    (await seeded_session.get(Setting, "min_order")).value = "500000"
+    await seeded_session.commit()
+    flags = (await client.post("/public/quote", json=custom_body(ids))).json()["flags"]
+    assert flags["below_minimum"] is True
+    assert flags["min_order"] == 500000

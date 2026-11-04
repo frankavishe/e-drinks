@@ -15,6 +15,7 @@ from app.services.pricing import (
     QuoteError,
     QuoteRequest,
     build_quote,
+    has_staff_addon,
     package_quantities,
     tier_price,
 )
@@ -261,3 +262,73 @@ def test_below_minimum_still_returns_a_full_quote():
     q = quote(custom((1, 1)), catalog=_one_product_catalog(1000))
     assert q.total == 1000
     assert q.deposit_due == 500
+
+
+# --- T020: add-on pricing and availability ---------------------------------------------------
+
+
+def test_addon_lines_are_priced_per_unit():
+    q = quote(request(addons=((1, 6), (3, 4))), availability={1: 20, 3: 10})
+    lines = {line.addon_id: line for line in q.addon_lines}
+    assert (lines[1].qty, lines[1].unit_price, lines[1].line_total) == (6, 15000, 90000)
+    assert (lines[3].qty, lines[3].unit_price, lines[3].line_total) == (4, 40000, 160000)  # per shift
+    assert (lines[1].name_sw, lines[1].name_en) == ("Jokofu", "Cooler")
+    assert q.addons_total == 250000
+    assert q.total == 1097000 + 250000
+    assert q.deposit_due == 673500
+
+
+def test_addon_within_free_count_is_ok():
+    q = quote(request(addons=((1, 3),)), availability={1: 3})
+    assert (q.addon_lines[0].ok, q.addon_lines[0].available) == (True, 3)
+    assert q.flags.addons_unavailable == ()
+
+
+def test_addon_above_free_count_is_flagged_with_the_free_count():
+    q = quote(request(addons=((1, 4),)), availability={1: 3})
+    assert (q.addon_lines[0].ok, q.addon_lines[0].available) == (False, 3)
+    assert q.flags.addons_unavailable == (1,)
+
+
+def test_total_is_still_computed_when_an_addon_is_short():
+    q = quote(request(addons=((1, 4),)), availability={1: 3})
+    assert q.addons_total == 60000
+    assert q.total == 1097000 + 60000
+
+
+def test_unlimited_addon_is_always_ok():
+    q = quote(request(addons=((2, 500),)), availability={2: None})
+    assert (q.addon_lines[0].ok, q.addon_lines[0].available) == (True, None)
+
+
+def test_unknown_or_inactive_addon_is_rejected():
+    with pytest.raises(QuoteError, match="99"):
+        quote(request(addons=((99, 1),)))
+
+
+def test_addons_count_toward_the_minimum():
+    catalog = Catalog(
+        products={1: ProductInfo(1, "x", "x", "u", 1, ((1, 290000),))},
+        addons={1: COOLER},
+        area_fees={7: 0},
+    )
+    without = quote(custom((1, 1)), catalog=catalog)
+    with_addon = quote(custom((1, 1), addons=((1, 1),)), catalog=catalog, availability={1: 20})
+    assert without.flags.below_minimum is True
+    assert with_addon.flags.below_minimum is False
+
+
+# --- T023: staff add-ons decide which notice period applies ----------------------------------
+
+
+@pytest.mark.parametrize(
+    ("addons", "expected"),
+    [((), False), (((1, 2), (2, 5)), False), (((3, 1),), True), (((1, 2), (4, 1)), True), (((99, 1),), False)],
+)
+def test_has_staff_addon(addons, expected):
+    assert has_staff_addon(request(addons=addons), CATALOG) is expected
+
+
+def test_is_rush_is_passed_through_to_the_flags():
+    assert quote(request(), is_rush=True).flags.is_rush is True
+    assert quote(request(), is_rush=False).flags.is_rush is False

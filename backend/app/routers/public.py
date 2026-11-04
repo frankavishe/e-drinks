@@ -20,8 +20,15 @@ from app.schemas.public import (
     VenueOut,
     ZoneOut,
 )
+from app.services.availability import addon_availability, is_rush, today_eat
 from app.services.catalog_loader import load_catalog
-from app.services.pricing import CatalogError, QuoteError, QuoteRequest, build_quote
+from app.services.pricing import (
+    CatalogError,
+    QuoteError,
+    QuoteRequest,
+    build_quote,
+    has_staff_addon,
+)
 from app.services.settings_store import load_pricing_settings
 
 router = APIRouter(prefix="/public", tags=["public"])
@@ -93,8 +100,14 @@ async def quote(body: QuoteIn, session: Session):
     req = _to_request(body)
     loaded_catalog = await load_catalog(session)
     settings = await load_pricing_settings(session)
+    availability = await addon_availability(
+        session, [addon_id for addon_id, _ in req.addons], req.setup_at, req.collect_at
+    )
     try:
-        result = build_quote(req, loaded_catalog, settings, availability={}, is_rush=False)
+        rush = is_rush(
+            req.event_date, today_eat(), has_staff_addon(req, loaded_catalog), settings
+        )
+        result = build_quote(req, loaded_catalog, settings, availability=availability, is_rush=rush)
     except (QuoteError, CatalogError) as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return QuoteOut.model_validate(result)

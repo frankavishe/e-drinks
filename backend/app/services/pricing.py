@@ -8,6 +8,8 @@ from datetime import date, datetime, timedelta
 from fractions import Fraction
 from math import ceil
 
+STAFF_KINDS = {"server", "bartender"}
+
 
 class QuoteError(ValueError):
     """The request cannot be quoted (bad input, or an unknown/inactive item)."""
@@ -191,6 +193,37 @@ def _drink_lines(req: QuoteRequest, catalog: Catalog) -> tuple[QuoteLine, ...]:
     )
 
 
+def has_staff_addon(req: QuoteRequest, catalog: Catalog) -> bool:
+    """Servers and bartenders are both staff shifts, which need the longer notice."""
+    kinds = {catalog.addons[addon_id].kind for addon_id, _ in req.addons if addon_id in catalog.addons}
+    return bool(kinds & STAFF_KINDS)
+
+
+def _addon_lines(
+    req: QuoteRequest, catalog: Catalog, availability: dict[int, int | None]
+) -> tuple[AddonLine, ...]:
+    lines = []
+    for addon_id, qty in req.addons:
+        addon = catalog.addons.get(addon_id)
+        if addon is None:
+            raise QuoteError(f"Unknown or inactive add-on {addon_id}")
+        # Indexed on purpose: a missing entry must fail, never read as "unlimited" and overbook.
+        available = availability[addon_id]
+        lines.append(
+            AddonLine(
+                addon_id=addon_id,
+                name_sw=addon.name_sw,
+                name_en=addon.name_en,
+                qty=qty,
+                unit_price=addon.price,
+                line_total=qty * addon.price,
+                available=available,
+                ok=available is None or qty <= available,
+            )
+        )
+    return tuple(lines)
+
+
 def _delivery_fee(req: QuoteRequest, catalog: Catalog) -> int:
     if req.area_id not in catalog.area_fees:
         raise QuoteError(f"Unknown area {req.area_id}")
@@ -206,16 +239,18 @@ def build_quote(
     is_rush: bool,
 ) -> Quote:
     lines = _drink_lines(req, catalog)
+    addon_lines = _addon_lines(req, catalog, availability)
     subtotal = sum(line.line_total for line in lines)
+    addons_total = sum(line.line_total for line in addon_lines)
     empties_deposit = sum(line.empties_deposit for line in lines)
     delivery_fee = _delivery_fee(req, catalog)
-    total = subtotal + delivery_fee + empties_deposit
+    total = subtotal + addons_total + delivery_fee + empties_deposit
 
     return Quote(
         lines=lines,
-        addon_lines=(),
+        addon_lines=addon_lines,
         subtotal=subtotal,
-        addons_total=0,
+        addons_total=addons_total,
         delivery_fee=delivery_fee,
         delivery_custom=False,
         empties_deposit=empties_deposit,
@@ -224,9 +259,9 @@ def build_quote(
         balance_due_date=req.event_date - timedelta(days=settings.balance_due_days),
         flags=QuoteFlags(
             is_rush=is_rush,
-            below_minimum=subtotal < settings.min_order,
+            below_minimum=subtotal + addons_total < settings.min_order,
             min_order=settings.min_order,
             provisional=False,
-            addons_unavailable=(),
+            addons_unavailable=tuple(line.addon_id for line in addon_lines if not line.ok),
         ),
     )

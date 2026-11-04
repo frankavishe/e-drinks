@@ -70,10 +70,10 @@ run it and see it fail, then implement.
 
 **Independent Test**: 10 coolers owned, 7 held on an overlapping booking → asking for 4 is refused (3 available).
 
-- [ ] T018 [US3] Test-first: `backend/tests/test_availability.py` (DB): overlapping confirmed booking reduces free count; touching windows don't conflict; cancelled/request/closed/returns_settled bookings don't hold; two bookings that overlap the window but not each other count as the peak, not the sum (R4); next-morning collection; `exclude_booking_id`; unlimited capacity (ice)
-- [ ] T019 [US3] Implement `async addon_availability(session, addon_ids, setup_at, collect_at, exclude_booking_id=None) -> dict[int, int | None]` in `backend/app/services/availability.py`
-- [ ] T020 [US3] Test-first in `backend/tests/test_pricing.py`: add-on lines priced (servers per shift), `ok=false` + `available` when qty > free, `addons_unavailable` lists ids, total still computed
-- [ ] T021 [US3] Wire add-on pricing and availability into `build_quote()` and the `/public/quote` route; API test asking for 21 coolers → `ok: false, available: 20`
+- [X] T018 [US3] Test-first: `backend/tests/test_availability.py` (DB): overlapping confirmed booking reduces free count; touching windows don't conflict; cancelled/request/closed/returns_settled bookings don't hold; two bookings that overlap the window but not each other count as the peak, not the sum (R4); next-morning collection; `exclude_booking_id`; unlimited capacity (ice)
+- [X] T019 [US3] Implement `async addon_availability(session, addon_ids, setup_at, collect_at, exclude_booking_id=None) -> dict[int, int | None]` in `backend/app/services/availability.py`
+- [X] T020 [US3] Test-first in `backend/tests/test_pricing.py`: add-on lines priced (servers per shift), `ok=false` + `available` when qty > free, `addons_unavailable` lists ids, total still computed
+- [X] T021 [US3] Wire add-on pricing and availability into `build_quote()` and the `/public/quote` route; API test asking for 21 coolers → `ok: false, available: 20`
 
 ---
 
@@ -81,8 +81,8 @@ run it and see it fail, then implement.
 
 **Independent Test**: 2 days ahead → rush; servers + 5 days → rush; servers + 8 days → not rush.
 
-- [ ] T022 [US4] Test-first in `backend/tests/test_availability.py`: `is_rush(event_date, today, has_staff_addon, settings)` at boundaries (exactly notice days → not rush; notice − 1 → rush); bartender counts as staff; past date → QuoteError
-- [ ] T023 [US4] Implement `is_rush()` and `today_eat()` in `backend/app/services/availability.py` and set `flags.is_rush` in the quote; API test where changing the `notice_days` setting changes the result (SC-004)
+- [X] T022 [US4] Test-first in `backend/tests/test_availability.py`: `is_rush(event_date, today, has_staff_addon, settings)` at boundaries (exactly notice days → not rush; notice − 1 → rush); bartender counts as staff; past date → QuoteError
+- [X] T023 [US4] Implement `is_rush()` and `today_eat()` in `backend/app/services/availability.py` and set `flags.is_rush` in the quote; API test where changing the `notice_days` setting changes the result (SC-004)
 
 ---
 
