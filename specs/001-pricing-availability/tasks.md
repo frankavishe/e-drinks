@@ -95,8 +95,8 @@ run it and see it fail, then implement.
 
 ## Phase 8: Polish
 
-- [ ] T026 [P] Run full `pytest`; run quickstart.md manually against a seeded dev DB and record the Silver example figures
-- [ ] T027 [P] Update `README.md` with the public API endpoints and a curl example
+- [X] T026 [P] Run full `pytest`; run quickstart.md manually against a seeded dev DB and record the Silver example figures
+- [X] T027 [P] Update `README.md` with the public API endpoints and a curl example
 
 ---
 

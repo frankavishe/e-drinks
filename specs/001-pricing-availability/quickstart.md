@@ -24,3 +24,31 @@ crates; deposit = ceil(total/2); balance due 3 days before. Also check:
 - 21 coolers → `ok: false`, `available: 20`
 - `custom_area: "Bagamoyo"` → `delivery_custom: true`, `provisional: true`
 - response JSON contains no `cost`
+
+## Verified
+
+2026-11-04, real `uvicorn` server over HTTP, on a throwaway SQLite database built with
+`Base.metadata.create_all` and `app.seed.seed`. Postgres and the Alembic migrations were not exercised.
+All the checks above passed.
+
+Silver, 300 guests, 5 h, Masaki, 6 coolers, event 2026-11-18:
+
+| Line | Packs | Unit price | Line total | Empties deposit |
+|---|---:|---:|---:|---:|
+| Coca-Cola 350ml | 10 | 16,000 | 160,000 | 60,000 |
+| Fanta Orange 350ml | 7 | 16,500 | 115,500 | 42,000 |
+| Sprite 350ml | 4 | 16,500 | 66,000 | 24,000 |
+| Water 500ml | 25 | 6,000 | 150,000 | 0 |
+| Kilimanjaro Lager 500ml | 12 | 48,500 | 582,000 | 120,000 |
+| Safari Lager 500ml | 6 | 52,000 | 312,000 | 60,000 |
+
+| Figure | TZS |
+|---|---:|
+| Subtotal | 1,385,500 |
+| Add-ons (6 coolers @ 15,000) | 90,000 |
+| Delivery | 25,000 |
+| Empties deposit | 306,000 |
+| **Total** | **1,806,500** |
+| Deposit due | 903,250 |
+
+Balance due 2026-11-15.
