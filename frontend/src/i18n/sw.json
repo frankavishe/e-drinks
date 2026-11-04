@@ -25,5 +25,174 @@
     "error": "Imeshindikana kuingia. Hakikisha barua pepe na nenosiri.",
     "notConfigured": "Supabase bado haijawekwa (VITE_SUPABASE_URL)."
   },
-  "comingSoon": "Inakuja hivi karibuni"
+  "comingSoon": "Inakuja hivi karibuni",
+  "eventType": {
+    "wedding": "Harusi",
+    "corporate": "Tukio la kampuni",
+    "birthday": "Siku ya kuzaliwa",
+    "other": "Tukio jingine"
+  },
+  "status": {
+    "request": "Ombi limepokelewa",
+    "quoted": "Bei imetolewa",
+    "confirmed": "Imethibitishwa",
+    "fully_paid": "Imelipwa yote",
+    "delivered": "Imefikishwa",
+    "returns_settled": "Marejesho yamekamilika",
+    "closed": "Imefungwa",
+    "cancelled": "Imeghairiwa"
+  },
+  "totals": {
+    "drinks": "Vinywaji",
+    "addons": "Huduma za ziada",
+    "delivery": "Usafirishaji",
+    "deliveryPending": "Bei itathibitishwa",
+    "empties": "Amana ya chupa na kreti (inarudishwa)",
+    "total": "Jumla",
+    "deposit": "Amana ya 50%",
+    "balanceDate": "Salio linalipwa kabla ya",
+    "paid": "Kilicholipwa",
+    "pending": "Kinasubiri uthibitisho",
+    "balance": "Salio"
+  },
+  "payment": {
+    "howToPay": "Jinsi ya kulipa",
+    "bank": "Benki",
+    "noDetails": "Tutakutumia namba za malipo kupitia WhatsApp.",
+    "kind": {
+      "deposit": "Amana",
+      "balance": "Salio"
+    },
+    "method": {
+      "mpesa": "M-Pesa",
+      "tigopesa": "Tigo Pesa",
+      "airtel": "Airtel Money",
+      "bank": "Benki"
+    },
+    "paymentStatus": {
+      "pending": "Inasubiri uthibitisho",
+      "confirmed": "Imethibitishwa",
+      "rejected": "Imekataliwa"
+    }
+  },
+  "book": {
+    "progress": "Hatua {{step}} kati ya {{total}}",
+    "next": "Endelea",
+    "back": "Rudi",
+    "more": "Ongeza",
+    "less": "Punguza",
+    "loading": "Inapakia…",
+    "quoteError": "Hatukuweza kupata bei. Rudi nyuma uhakikishe tarehe na oda yako.",
+    "event": {
+      "title": "Tukio lako",
+      "type": "Aina ya tukio",
+      "date": "Tarehe ya tukio",
+      "startTime": "Saa ya kuanza",
+      "hours": "Muda wa tukio (saa)",
+      "guests": "Idadi ya wageni",
+      "venue": "Ukumbi",
+      "otherVenue": "Ukumbi mwingine",
+      "venueName": "Jina la ukumbi",
+      "venueAddress": "Anwani ya ukumbi",
+      "area": "Eneo",
+      "chooseArea": "Chagua eneo",
+      "areaNotListed": "Eneo langu halipo",
+      "customArea": "Andika eneo lako",
+      "customAreaHint": "Tutakuthibitishia bei ya usafirishaji.",
+      "setupTime": "Saa ya kuandaa",
+      "setupHint": "Tutaleta vinywaji na vifaa siku ya tukio, saa hii.",
+      "collectDay": "Siku ya kukusanya vifaa",
+      "collectSame": "Siku hiyo hiyo",
+      "collectNext": "Asubuhi inayofuata",
+      "collectTime": "Saa ya kukusanya",
+      "collectBeforeSetup": "Saa ya kukusanya lazima iwe baada ya saa ya kuandaa."
+    },
+    "order": {
+      "title": "Vinywaji",
+      "modePackage": "Kifurushi",
+      "modeCustom": "Chagua mwenyewe",
+      "choosePackage": "Chagua kifurushi",
+      "adjust": "Badilisha idadi ukitaka",
+      "chooseDrinks": "Chagua vinywaji na idadi",
+      "subtotal": "Jumla ya vinywaji"
+    },
+    "addons": {
+      "title": "Huduma za ziada",
+      "lead": "Ongeza majokofu, barafu na wahudumu ukihitaji.",
+      "onlyAvailable_one": "Imebaki {{count}} tu kwa muda wako.",
+      "onlyAvailable_other": "Zimebaki {{count}} tu kwa muda wako."
+    },
+    "review": {
+      "title": "Hakiki bei",
+      "item": "Bidhaa",
+      "qty": "Idadi",
+      "amount": "Kiasi",
+      "belowMinimum": "Oda ya chini ni {{amount}}, bila usafirishaji na amana ya chupa. Ongeza oda yako ili kuendelea.",
+      "addonsShort": "Baadhi ya huduma za ziada hazitoshi kwa muda wako. Rudi nyuma upunguze idadi.",
+      "rush": "Tukio lako liko karibu. Tutakuthibitishia kama tunaweza kulihudumia.",
+      "provisional": "Jumla hii haina usafirishaji. Tutakuthibitishia bei ya usafirishaji."
+    },
+    "conflict": {
+      "addons_unavailable": "Huduma za ziada ulizochagua hazitoshi tena. Oda yako haijatumwa. Rudi nyuma upunguze idadi.",
+      "below_minimum": "Oda yako iko chini ya kiwango cha chini. Oda yako haijatumwa.",
+      "quote_changed": "Bei imebadilika tangu ulipoihakiki. Oda yako haijatumwa. Angalia bei mpya kisha uendelee."
+    },
+    "contact": {
+      "title": "Mawasiliano yako",
+      "name": "Jina lako",
+      "phone": "Namba ya simu",
+      "phoneHint": "Namba ya Tanzania, kama 0712 345 678. Utaihitaji kufuatilia oda yako.",
+      "email": "Barua pepe (si lazima)",
+      "notes": "Maelezo ya ziada (si lazima)",
+      "policyTitle": "Masharti ya oda",
+      "acceptPolicy": "Nimesoma na kukubali masharti ya oda.",
+      "ageConfirmed": "Nina umri wa miaka 18 au zaidi.",
+      "submit": "Tuma oda",
+      "invalid": "Oda haijatumwa. Hakikisha jina, namba ya simu na barua pepe.",
+      "tooMany": "Oda haijatumwa: majaribio mengi sana. Jaribu tena baada ya dakika 10.",
+      "failed": "Oda haijatumwa. Angalia mtandao wako kisha ujaribu tena."
+    },
+    "confirm": {
+      "title": "Oda yako imepokelewa",
+      "keepNumber": "Tunza namba hii. Utaihitaji kufuatilia oda na kulipa.",
+      "rush": "Tukio lako liko karibu. Tutakuthibitishia kama tunaweza kulihudumia kabla hujalipa amana.",
+      "provisional": "Jumla hii haina usafirishaji. Tutakuthibitishia bei ya usafirishaji.",
+      "payLead": "Amana ya 50% inathibitisha tarehe yako. Baada ya kulipa, tuma namba ya muamala kwenye ukurasa wa kufuatilia oda.",
+      "whatsapp": "Endelea kwenye WhatsApp",
+      "whatsappMessage": "Habari, nimeweka oda namba {{code}}.",
+      "track": "Fuatilia oda yako"
+    }
+  },
+  "track": {
+    "title": "Fuatilia oda yako",
+    "lead": "Andika namba ya oda na namba ya simu uliyotumia.",
+    "code": "Namba ya oda",
+    "phone": "Namba ya simu",
+    "submit": "Tafuta oda",
+    "notFound": "Hatukupata oda yenye namba hii na simu hii. Hakikisha zote mbili.",
+    "tooMany": "Majaribio mengi sana. Jaribu tena baada ya dakika 10.",
+    "failed": "Imeshindikana kutafuta oda. Angalia mtandao wako kisha ujaribu tena.",
+    "status": "Hali ya oda",
+    "rush": "Tukio lako liko karibu. Tutakuthibitishia kama tunaweza kulihudumia.",
+    "provisional": "Jumla hii haina usafirishaji. Tutakuthibitishia bei ya usafirishaji.",
+    "guests": "wageni {{count}}",
+    "hours": "saa {{count}}",
+    "order": "Oda yako",
+    "payments": "Malipo yako",
+    "noPayments": "Bado hujatuma malipo."
+  },
+  "pay": {
+    "title": "Tuma namba ya muamala",
+    "lead": "Lipa kwanza, kisha tuma taarifa za malipo hapa. Tutayathibitisha.",
+    "kind": "Malipo ya",
+    "method": "Njia ya malipo",
+    "amount": "Kiasi (TSh)",
+    "reference": "Namba ya muamala",
+    "submit": "Tuma malipo",
+    "sent": "Tumepokea. Malipo yako yanasubiri uthibitisho.",
+    "duplicate": "Namba hii ya muamala tayari imetumwa kwa oda hii.",
+    "closed": "Oda hii imefungwa au imeghairiwa, kwa hiyo haipokei malipo.",
+    "invalid": "Hakikisha kiasi na namba ya muamala.",
+    "failed": "Malipo hayajatumwa. Angalia mtandao wako kisha ujaribu tena."
+  }
 }

@@ -21,20 +21,20 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 ## Phase 1: Setup
 
-- [ ] T001 Run `pytest` in `backend/` and `npm test` in `frontend/` to confirm both suites are green before starting
+- [X] T001 Run `pytest` in `backend/` and `npm test` in `frontend/` to confirm both suites are green before starting
 
 ---
 
 ## Phase 2: Foundational (blocks all stories)
 
-- [ ] T002 [P] Test-first: `backend/tests/test_phone.py`. `0712345678`, `255712345678`, `+255 712-345-678` and `0612345678` normalise to `255…`; landlines, foreign numbers, wrong lengths and text are rejected
-- [ ] T003 Implement `normalise_phone` in `backend/app/services/phone.py`
-- [ ] T004 Add `BookingCounter`, unique `customers.phone` and partial unique index `uq_payments_booking_reference` ("where `reference <> '' AND status <> 'rejected'`") in `backend/app/models/booking.py`; export from `backend/app/models/__init__.py`
-- [ ] T005 Write the Alembic migration in `backend/alembic/versions/` with RLS on `booking_counters` for Postgres, and a working downgrade
-- [ ] T006 Move the shared quote steps from `backend/app/routers/public.py` into `backend/app/services/quoting.py`; existing `tests/test_public_api.py` stays green
-- [ ] T007 Test-first in `backend/tests/test_settings_store.py`: public settings loader returns only the whitelisted keys. Implement in `backend/app/services/settings_store.py`; add `notification_email` to `backend/app/seed.py`
-- [ ] T008 [P] Test-first: `backend/tests/test_rate_limit.py`. Blocks past the limit, recovers after the window, keys are independent. Implement `backend/app/services/rate_limit.py`
-- [ ] T009 Extend `ApiError` in `frontend/src/lib/api.ts` with `code` and `quote`; add types, calls, `formatTzs` to `frontend/src/lib/publicApi.ts`
+- [X] T002 [P] Test-first: `backend/tests/test_phone.py`. `0712345678`, `255712345678`, `+255 712-345-678` and `0612345678` normalise to `255…`; landlines, foreign numbers, wrong lengths and text are rejected
+- [X] T003 Implement `normalise_phone` in `backend/app/services/phone.py`
+- [X] T004 Add `BookingCounter`, unique `customers.phone` and partial unique index `uq_payments_booking_reference` ("where `reference <> '' AND status <> 'rejected'`") in `backend/app/models/booking.py`; export from `backend/app/models/__init__.py`
+- [X] T005 Write the Alembic migration in `backend/alembic/versions/` with RLS on `booking_counters` for Postgres, and a working downgrade
+- [X] T006 Move the shared quote steps from `backend/app/routers/public.py` into `backend/app/services/quoting.py`; existing `tests/test_public_api.py` stays green
+- [X] T007 Test-first in `backend/tests/test_settings_store.py`: public settings loader returns only the whitelisted keys. Implement in `backend/app/services/settings_store.py`; add `notification_email` to `backend/app/seed.py`
+- [X] T008 [P] Test-first: `backend/tests/test_rate_limit.py`. Blocks past the limit, recovers after the window, keys are independent. Implement `backend/app/services/rate_limit.py`
+- [X] T009 Extend `ApiError` in `frontend/src/lib/api.ts` with `code` and `quote`; add types, calls, `formatTzs` to `frontend/src/lib/publicApi.ts`
 
 **Checkpoint**: schema, shared quote code and limiter ready.
 
@@ -46,12 +46,12 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 **Independent Test**: complete the wizard in Swahili for a 300-guest Silver wedding at a Masaki venue; the number is issued with the same totals as the quote.
 
-- [ ] T010 [US1] Test-first: `backend/tests/test_bookings.py`. Sequential numbers with yearly reset; saved totals equal the quote (Silver, 300 guests, Masaki); snapshots survive a later price change; `unit_cost` copied; rush and provisional saved; same phone reuses the customer, keeping the name and filling a blank email; first history row
-- [ ] T011 [US1] Implement `create_booking` in `backend/app/services/bookings.py`
-- [ ] T012 [US1] Test-first: `backend/tests/test_booking_api.py`. `201` shape with no cost fields; `409` for `addons_unavailable`, `below_minimum` and `quote_changed` with nothing saved; `422` for policy or 18+ not accepted (must be true), invalid phone, venue not in the area; creation rate limit
-- [ ] T013 [US1] Add schemas to `backend/app/schemas/public.py` and `GET /public/settings` and `POST /public/bookings` to `backend/app/routers/public.py`
-- [ ] T014 [US1] Vitest in `frontend/src/pages/book/BookingWizard.test.tsx`: language switch keeps data; submit blocked until both boxes are ticked; venue autofill; `409` shown at review
-- [ ] T015 [US1] Implement `frontend/src/pages/book/` (`BookingWizard`, `EventStep`, `OrderStep`, `AddonsStep`, `ReviewStep`, `ContactStep`, `Confirmation`), the `/book` route in `frontend/src/App.tsx`, and strings in `frontend/src/i18n/sw.json` and `en.json`
+- [X] T010 [US1] Test-first: `backend/tests/test_bookings.py`. Sequential numbers with yearly reset; saved totals equal the quote (Silver, 300 guests, Masaki); snapshots survive a later price change; `unit_cost` copied; rush and provisional saved; same phone reuses the customer, keeping the name and filling a blank email; first history row
+- [X] T011 [US1] Implement `create_booking` in `backend/app/services/bookings.py`
+- [X] T012 [US1] Test-first: `backend/tests/test_booking_api.py`. `201` shape with no cost fields; `409` for `addons_unavailable`, `below_minimum` and `quote_changed` with nothing saved; `422` for policy or 18+ not accepted (must be true), invalid phone, venue not in the area; creation rate limit
+- [X] T013 [US1] Add schemas to `backend/app/schemas/public.py` and `GET /public/settings` and `POST /public/bookings` to `backend/app/routers/public.py`
+- [X] T014 [US1] Vitest in `frontend/src/pages/book/BookingWizard.test.tsx`: language switch keeps data; submit blocked until both boxes are ticked; venue autofill; `409` shown at review
+- [X] T015 [US1] Implement `frontend/src/pages/book/` (`BookingWizard`, `EventStep`, `OrderStep`, `AddonsStep`, `ReviewStep`, `ContactStep`, `Confirmation`), the `/book` route in `frontend/src/App.tsx`, and strings in `frontend/src/i18n/sw.json` and `en.json`
 
 **Checkpoint**: bookings can be created end to end.
 
@@ -63,8 +63,8 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 **Independent Test**: the link holds the business number and booking number.
 
-- [ ] T016 [US2] Vitest in `frontend/src/lib/publicApi.test.ts`: `whatsappLink` holds the number and encoded message, in both languages
-- [ ] T017 [US2] Implement `whatsappLink` in `frontend/src/lib/publicApi.ts` and the button in `frontend/src/pages/book/Confirmation.tsx`
+- [X] T016 [US2] Vitest in `frontend/src/lib/publicApi.test.ts`: `whatsappLink` holds the number and encoded message, in both languages
+- [X] T017 [US2] Implement `whatsappLink` in `frontend/src/lib/publicApi.ts` and the button in `frontend/src/pages/book/Confirmation.tsx`
 
 ---
 

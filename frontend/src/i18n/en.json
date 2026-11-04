@@ -25,5 +25,174 @@
     "error": "Login failed. Check your email and password.",
     "notConfigured": "Supabase is not configured yet (VITE_SUPABASE_URL)."
   },
-  "comingSoon": "Coming soon"
+  "comingSoon": "Coming soon",
+  "eventType": {
+    "wedding": "Wedding",
+    "corporate": "Company event",
+    "birthday": "Birthday",
+    "other": "Other event"
+  },
+  "status": {
+    "request": "Request received",
+    "quoted": "Quoted",
+    "confirmed": "Confirmed",
+    "fully_paid": "Fully paid",
+    "delivered": "Delivered",
+    "returns_settled": "Returns settled",
+    "closed": "Closed",
+    "cancelled": "Cancelled"
+  },
+  "totals": {
+    "drinks": "Drinks",
+    "addons": "Extras",
+    "delivery": "Delivery",
+    "deliveryPending": "To be confirmed",
+    "empties": "Bottle and crate deposit (refundable)",
+    "total": "Total",
+    "deposit": "50% deposit",
+    "balanceDate": "Balance due by",
+    "paid": "Paid",
+    "pending": "Waiting for confirmation",
+    "balance": "Balance"
+  },
+  "payment": {
+    "howToPay": "How to pay",
+    "bank": "Bank",
+    "noDetails": "We'll send you the payment numbers on WhatsApp.",
+    "kind": {
+      "deposit": "Deposit",
+      "balance": "Balance"
+    },
+    "method": {
+      "mpesa": "M-Pesa",
+      "tigopesa": "Tigo Pesa",
+      "airtel": "Airtel Money",
+      "bank": "Bank"
+    },
+    "paymentStatus": {
+      "pending": "Waiting for confirmation",
+      "confirmed": "Confirmed",
+      "rejected": "Rejected"
+    }
+  },
+  "book": {
+    "progress": "Step {{step}} of {{total}}",
+    "next": "Next",
+    "back": "Back",
+    "more": "More",
+    "less": "Less",
+    "loading": "Loading…",
+    "quoteError": "We couldn't get a price. Go back and check your date and order.",
+    "event": {
+      "title": "Your event",
+      "type": "Event type",
+      "date": "Event date",
+      "startTime": "Start time",
+      "hours": "Event length (hours)",
+      "guests": "Number of guests",
+      "venue": "Venue",
+      "otherVenue": "Another venue",
+      "venueName": "Venue name",
+      "venueAddress": "Venue address",
+      "area": "Area",
+      "chooseArea": "Choose an area",
+      "areaNotListed": "My area isn't listed",
+      "customArea": "Type your area",
+      "customAreaHint": "We'll confirm the delivery price.",
+      "setupTime": "Setup time",
+      "setupHint": "We deliver the drinks and equipment on the event day, at this time.",
+      "collectDay": "Equipment collection day",
+      "collectSame": "Same day",
+      "collectNext": "Next morning",
+      "collectTime": "Collection time",
+      "collectBeforeSetup": "Collection time must be after setup time."
+    },
+    "order": {
+      "title": "Drinks",
+      "modePackage": "Package",
+      "modeCustom": "Choose my own",
+      "choosePackage": "Choose a package",
+      "adjust": "Change the quantities if you like",
+      "chooseDrinks": "Choose drinks and quantities",
+      "subtotal": "Drinks total"
+    },
+    "addons": {
+      "title": "Extras",
+      "lead": "Add coolers, ice and servers if you need them.",
+      "onlyAvailable_one": "Only {{count}} left for your times.",
+      "onlyAvailable_other": "Only {{count}} left for your times."
+    },
+    "review": {
+      "title": "Review your price",
+      "item": "Item",
+      "qty": "Qty",
+      "amount": "Amount",
+      "belowMinimum": "The minimum order is {{amount}}, not counting delivery and the bottle deposit. Add to your order to continue.",
+      "addonsShort": "Some extras aren't available in that number for your times. Go back and lower the quantity.",
+      "rush": "Your event is soon. We'll confirm whether we can serve it.",
+      "provisional": "This total doesn't include delivery. We'll confirm the delivery price."
+    },
+    "conflict": {
+      "addons_unavailable": "The extras you chose are no longer available in that number. Your booking wasn't sent. Go back and lower the quantity.",
+      "below_minimum": "Your order is below the minimum. Your booking wasn't sent.",
+      "quote_changed": "The price changed since you reviewed it. Your booking wasn't sent. Check the new price, then continue."
+    },
+    "contact": {
+      "title": "Your contact details",
+      "name": "Your name",
+      "phone": "Phone number",
+      "phoneHint": "A Tanzanian number, like 0712 345 678. You'll need it to track your booking.",
+      "email": "Email (optional)",
+      "notes": "Anything else we should know (optional)",
+      "policyTitle": "Booking terms",
+      "acceptPolicy": "I have read and accept the booking terms.",
+      "ageConfirmed": "I am 18 or older.",
+      "submit": "Send booking",
+      "invalid": "Your booking wasn't sent. Check your name, phone number and email.",
+      "tooMany": "Your booking wasn't sent: too many attempts. Try again in 10 minutes.",
+      "failed": "Your booking wasn't sent. Check your connection and try again."
+    },
+    "confirm": {
+      "title": "We've received your booking",
+      "keepNumber": "Keep this number. You'll need it to track your booking and pay.",
+      "rush": "Your event is soon. We'll confirm whether we can serve it before you pay a deposit.",
+      "provisional": "This total doesn't include delivery. We'll confirm the delivery price.",
+      "payLead": "A 50% deposit locks your date. After paying, send the transaction reference on the tracking page.",
+      "whatsapp": "Continue on WhatsApp",
+      "whatsappMessage": "Hello, I've made booking number {{code}}.",
+      "track": "Track your booking"
+    }
+  },
+  "track": {
+    "title": "Track your booking",
+    "lead": "Enter your booking number and the phone number you used.",
+    "code": "Booking number",
+    "phone": "Phone number",
+    "submit": "Find booking",
+    "notFound": "We couldn't find a booking with this number and phone. Check both.",
+    "tooMany": "Too many attempts. Try again in 10 minutes.",
+    "failed": "We couldn't look up the booking. Check your connection and try again.",
+    "status": "Booking status",
+    "rush": "Your event is soon. We'll confirm whether we can serve it.",
+    "provisional": "This total doesn't include delivery. We'll confirm the delivery price.",
+    "guests": "{{count}} guests",
+    "hours": "{{count}} hours",
+    "order": "Your order",
+    "payments": "Your payments",
+    "noPayments": "You haven't sent any payments yet."
+  },
+  "pay": {
+    "title": "Send your transaction reference",
+    "lead": "Pay first, then send the payment details here. We'll confirm them.",
+    "kind": "Payment for",
+    "method": "Payment method",
+    "amount": "Amount (TSh)",
+    "reference": "Transaction reference",
+    "submit": "Send payment",
+    "sent": "Received. Your payment is waiting for confirmation.",
+    "duplicate": "This reference has already been sent for this booking.",
+    "closed": "This booking is closed or cancelled, so it can't take payments.",
+    "invalid": "Check the amount and transaction reference.",
+    "failed": "Your payment wasn't sent. Check your connection and try again."
+  }
 }
