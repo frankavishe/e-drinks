@@ -1,11 +1,19 @@
 import httpx
+import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 import app.models  # noqa: F401
 from app.db import Base, get_session
 from app.main import app as fastapi_app
+from app.routers.public import booking_limiter, lookup_limiter
 from app.seed import seed
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limits():
+    booking_limiter.clear()
+    lookup_limiter.clear()
 
 
 @pytest_asyncio.fixture

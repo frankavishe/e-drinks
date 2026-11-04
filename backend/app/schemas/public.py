@@ -1,9 +1,10 @@
 """Public API shapes (contracts/public-api.md). Nothing here may carry a cost field."""
 
-from datetime import date
-from typing import Annotated
+from datetime import date, time
+from typing import Annotated, Literal
 
 from pydantic import (
+    AfterValidator,
     AwareDatetime,
     BaseModel,
     ConfigDict,
@@ -11,6 +12,8 @@ from pydantic import (
     StringConstraints,
     model_validator,
 )
+
+from app.services.phone import normalise_phone
 
 
 class _FromAttributes(BaseModel):
@@ -175,3 +178,55 @@ class QuoteOut(_FromAttributes):
     deposit_due: int
     balance_due_date: date
     flags: QuoteFlagsOut
+
+
+class PaymentInstructions(BaseModel):
+    mpesa_till: str
+    tigopesa_lipa: str
+    airtel_lipa: str
+    bank_details: str
+
+
+class PublicSettingsOut(BaseModel):
+    business_name: str
+    whatsapp_number: str
+    policy_text_sw: str
+    policy_text_en: str
+    payment_instructions: PaymentInstructions
+
+
+def _normalised_phone(value: str) -> str:
+    return normalise_phone(value)  # InvalidPhone is a ValueError, so this reports as a 422
+
+
+class BookingIn(QuoteIn):
+    event_type: Literal["wedding", "corporate", "birthday", "other"]
+    start_time: time
+    venue_id: int | None = None
+    venue_name: Annotated[str, StringConstraints(strip_whitespace=True, max_length=160)] = ""
+    venue_address: Annotated[str, StringConstraints(strip_whitespace=True, max_length=255)] = ""
+    name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
+    phone: Annotated[str, AfterValidator(_normalised_phone)]
+    email: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True, max_length=200, pattern=r"^$|^[^@\s]+@[^@\s]+\.[^@\s]+$"
+        ),
+    ] = ""
+    notes: Annotated[str, StringConstraints(strip_whitespace=True, max_length=1000)] = ""
+    lang: Literal["sw", "en"] = "sw"
+    expected_total: int = Field(ge=0)
+    accept_policy: Literal[True]
+    age_confirmed: Literal[True]
+
+
+class BookingCreatedOut(BaseModel):
+    code: str
+    status: str
+    is_rush: bool
+    provisional: bool
+    total: int
+    deposit_due: int
+    balance_due_date: date
+    payment_instructions: PaymentInstructions
+    whatsapp_number: str
