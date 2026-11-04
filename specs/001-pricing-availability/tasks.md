@@ -44,13 +44,13 @@ run it and see it fail, then implement.
 
 **Independent Test**: the quickstart Silver/300 guests/Masaki example matches the hand calculation.
 
-- [ ] T008 [US1] Test-first in `backend/tests/test_pricing.py`: package rounding (225 bottles / 24 → 10 crates; exact multiple stays exact; Fraction 300×0.1 = 30 bottles is exact), per_hour scaling (10 h on base 5 doubles; non-per-hour rule unchanged), inactive product skipped
-- [ ] T009 [US1] Test-first in `backend/tests/test_pricing.py`: tier selection at 1, 9, 10, 49, 50 packs; no tier for qty → CatalogError
-- [ ] T010 [US1] Test-first in `backend/tests/test_pricing.py`: zone delivery fee, empties deposit only on returnable products (packs × per-pack deposit), total = subtotal + addons + delivery + empties, deposit = ceil(total × 50 / 100) for odd totals, balance_due_date = event − 3 days
-- [ ] T011 [US1] Implement `package_quantities()`, `tier_price()`, and `build_quote()` (lines, delivery, empties, totals, deposit, balance date) in `backend/app/services/pricing.py` until T008–T010 pass
-- [ ] T012 [P] [US1] Pydantic schemas in `backend/app/schemas/public.py` per `contracts/public-api.md` (QuoteIn with validation rules from data-model.md; QuoteOut; catalog/package/addon/area outputs, all without cost fields)
-- [ ] T013 [US1] Test-first: `backend/tests/test_public_api.py` covering GET `/public/catalog`, `/public/packages`, `/public/addons`, `/public/areas` and a package POST `/public/quote` on seeded data; assert that no key containing "cost" appears anywhere in the responses
-- [ ] T014 [US1] Implement `backend/app/routers/public.py` (read endpoints + `/public/quote` wiring loader → availability → pricing) and include the router in `backend/app/main.py`
+- [X] T008 [US1] Test-first in `backend/tests/test_pricing.py`: package rounding (225 bottles / 24 → 10 crates; exact multiple stays exact; Fraction 300×0.1 = 30 bottles is exact), per_hour scaling (10 h on base 5 doubles; non-per-hour rule unchanged), inactive product skipped
+- [X] T009 [US1] Test-first in `backend/tests/test_pricing.py`: tier selection at 1, 9, 10, 49, 50 packs; no tier for qty → CatalogError
+- [X] T010 [US1] Test-first in `backend/tests/test_pricing.py`: zone delivery fee, empties deposit only on returnable products (packs × per-pack deposit), total = subtotal + addons + delivery + empties, deposit = ceil(total × 50 / 100) for odd totals, balance_due_date = event − 3 days
+- [X] T011 [US1] Implement `package_quantities()`, `tier_price()`, and `build_quote()` (lines, delivery, empties, totals, deposit, balance date) in `backend/app/services/pricing.py` until T008–T010 pass
+- [X] T012 [P] [US1] Pydantic schemas in `backend/app/schemas/public.py` per `contracts/public-api.md` (QuoteIn with validation rules from data-model.md; QuoteOut; catalog/package/addon/area outputs, all without cost fields)
+- [X] T013 [US1] Test-first: `backend/tests/test_public_api.py` covering GET `/public/catalog`, `/public/packages`, `/public/addons`, `/public/areas` and a package POST `/public/quote` on seeded data; assert that no key containing "cost" appears anywhere in the responses
+- [X] T014 [US1] Implement `backend/app/routers/public.py` (read endpoints + `/public/quote` wiring loader → availability → pricing) and include the router in `backend/app/main.py`
 
 **Checkpoint**: MVP: a package quote works end to end.
 
