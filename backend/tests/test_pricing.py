@@ -191,3 +191,73 @@ def test_balance_due_date_is_three_days_before_the_event():
 def test_balance_due_days_come_from_settings():
     q = quote(request(), settings=PricingSettings(balance_due_days=5))
     assert q.balance_due_date == date(2026, 12, 7)
+
+
+# --- T015: custom orders, overrides, minimum order -------------------------------------------
+
+
+def test_custom_items_use_tier_prices():
+    q = quote(custom((1, 12), (3, 3)))
+    lines = {line.product_id: line for line in q.lines}
+    assert (lines[1].packs, lines[1].unit_price, lines[1].line_total) == (12, 16000, 192000)
+    assert (lines[3].packs, lines[3].unit_price, lines[3].line_total) == (3, 50000, 150000)
+    assert lines[1].source == "custom"
+    assert q.subtotal == 342000
+    assert q.empties_deposit == 72000 + 30000
+
+
+def test_custom_item_unknown_or_inactive_product_is_rejected():
+    with pytest.raises(QuoteError, match="99"):
+        quote(custom((99, 1)))
+
+
+def test_override_replaces_a_package_line_and_reprices_its_tier():
+    lines = {line.product_id: line for line in quote(request(overrides={1: 9})).lines}
+    assert (lines[1].packs, lines[1].unit_price, lines[1].line_total) == (9, 16500, 148500)
+    assert lines[1].source == "package"
+    assert lines[1].empties_deposit == 54000
+
+
+def test_override_zero_removes_the_line():
+    q = quote(request(overrides={1: 0}))
+    assert 1 not in {line.product_id for line in q.lines}
+    assert q.subtotal == 150000 + 582000
+
+
+def test_override_for_a_product_outside_the_package_adds_it():
+    lines = {line.product_id: line for line in quote(request(overrides={4: 2})).lines}
+    assert (lines[4].packs, lines[4].unit_price, lines[4].source) == (2, 216000, "custom")
+    assert len(lines) == 4
+
+
+def test_override_for_unknown_or_inactive_product_is_rejected():
+    with pytest.raises(QuoteError, match="99"):
+        quote(request(overrides={99: 1}))
+
+
+def _one_product_catalog(price, deposit=0, fee=0):
+    product = ProductInfo(1, "x", "x", "u", 1, ((1, price),), deposit > 0, deposit)
+    return Catalog(products={1: product}, area_fees={7: fee})
+
+
+def test_below_minimum_flag_and_amount():
+    flags = quote(custom((1, 1)), catalog=_one_product_catalog(299999)).flags
+    assert flags.below_minimum is True
+    assert flags.min_order == 300000
+
+
+def test_exactly_the_minimum_is_not_below():
+    assert quote(custom((1, 1)), catalog=_one_product_catalog(300000)).flags.below_minimum is False
+
+
+def test_delivery_and_empties_do_not_count_toward_the_minimum():
+    catalog = _one_product_catalog(299999, deposit=50000, fee=60000)
+    q = quote(custom((1, 1)), catalog=catalog)
+    assert q.total == 409999
+    assert q.flags.below_minimum is True
+
+
+def test_below_minimum_still_returns_a_full_quote():
+    q = quote(custom((1, 1)), catalog=_one_product_catalog(1000))
+    assert q.total == 1000
+    assert q.deposit_due == 500

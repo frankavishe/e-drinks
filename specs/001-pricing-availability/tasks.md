@@ -60,9 +60,9 @@ run it and see it fail, then implement.
 
 **Independent Test**: custom 12 soda + 3 beer quote; override a package line; below-minimum flag.
 
-- [ ] T015 [US2] Test-first in `backend/tests/test_pricing.py`: custom items priced by tier; override replaces a package line; override 0 removes the line; override for a product not in the package adds it; below_minimum computed on subtotal + addons_total only (R6)
-- [ ] T016 [US2] Extend `build_quote()` in `backend/app/services/pricing.py` for items/overrides/min-order until T015 passes
-- [ ] T017 [US2] Add API tests in `backend/tests/test_public_api.py`: both package_id and items → 422; unknown or inactive product → 422; guests/hours/packs ≤ 0 → 422; collect_at ≤ setup_at → 422; custom quote 200
+- [X] T015 [US2] Test-first in `backend/tests/test_pricing.py`: custom items priced by tier; override replaces a package line; override 0 removes the line; override for a product not in the package adds it; below_minimum computed on subtotal + addons_total only (R6)
+- [X] T016 [US2] Extend `build_quote()` in `backend/app/services/pricing.py` for items/overrides/min-order until T015 passes
+- [X] T017 [US2] Add API tests in `backend/tests/test_public_api.py`: both package_id and items → 422; unknown or inactive product → 422; guests/hours/packs ≤ 0 → 422; collect_at ≤ setup_at → 422; custom quote 200
 
 ---
 

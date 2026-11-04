@@ -164,14 +164,30 @@ def _line(product: ProductInfo, packs: int, source: str) -> QuoteLine:
     )
 
 
-def _package_lines(req: QuoteRequest, catalog: Catalog) -> tuple[QuoteLine, ...]:
+def _product(catalog: Catalog, product_id: int) -> ProductInfo:
+    product = catalog.products.get(product_id)
+    if product is None:
+        raise QuoteError(f"Unknown or inactive product {product_id}")
+    return product
+
+
+def _drink_lines(req: QuoteRequest, catalog: Catalog) -> tuple[QuoteLine, ...]:
+    if req.package_id is None:
+        return tuple(
+            _line(_product(catalog, product_id), packs, "custom") for product_id, packs in req.items
+        )
+
     package = catalog.packages.get(req.package_id)
     if package is None:
         raise QuoteError(f"Unknown or inactive package {req.package_id}")
-    quantities = package_quantities(package, req.guests, req.hours, catalog.products)
+    computed = package_quantities(package, req.guests, req.hours, catalog.products)
+    for product_id in req.overrides:
+        _product(catalog, product_id)
+    quantities = {**computed, **req.overrides}
     return tuple(
-        _line(catalog.products[product_id], packs, "package")
+        _line(catalog.products[product_id], packs, "package" if product_id in computed else "custom")
         for product_id, packs in quantities.items()
+        if packs > 0
     )
 
 
@@ -189,7 +205,7 @@ def build_quote(
     availability: dict[int, int | None],
     is_rush: bool,
 ) -> Quote:
-    lines = _package_lines(req, catalog)
+    lines = _drink_lines(req, catalog)
     subtotal = sum(line.line_total for line in lines)
     empties_deposit = sum(line.empties_deposit for line in lines)
     delivery_fee = _delivery_fee(req, catalog)
@@ -208,7 +224,7 @@ def build_quote(
         balance_due_date=req.event_date - timedelta(days=settings.balance_due_days),
         flags=QuoteFlags(
             is_rush=is_rush,
-            below_minimum=False,
+            below_minimum=subtotal < settings.min_order,
             min_order=settings.min_order,
             provisional=False,
             addons_unavailable=(),

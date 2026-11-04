@@ -143,3 +143,108 @@ async def test_unknown_package_is_422_naming_it(client, ids):
     res = await client.post("/public/quote", json=body(ids, package_id=99999))
     assert res.status_code == 422
     assert "99999" in res.json()["detail"]
+
+
+# --- T017: custom orders and validation ------------------------------------------------------
+
+
+def custom_body(ids, **overrides):
+    coke = ids["products"]["Coca-Cola 350ml"]
+    beer = ids["products"]["Kilimanjaro Lager 500ml"]
+    values = {
+        "package_id": None,
+        "items": [{"product_id": coke, "packs": 12}, {"product_id": beer, "packs": 3}],
+    }
+    return body(ids, **{**values, **overrides})
+
+
+async def test_custom_quote_matches_hand_calculation(client, ids):
+    res = await client.post("/public/quote", json=custom_body(ids))
+    assert res.status_code == 200
+    q = res.json()
+    assert q["subtotal"] == 342000  # 12 x 16,000 + 3 x 50,000
+    assert q["empties_deposit"] == 102000  # 12 x 6,000 + 3 x 10,000
+    assert q["total"] == 469000  # + 25,000 delivery
+    assert q["deposit_due"] == 234500
+    assert q["flags"]["below_minimum"] is False
+    assert {line["source"] for line in q["lines"]} == {"custom"}
+
+
+async def test_override_through_the_api(client, ids):
+    coke = ids["products"]["Coca-Cola 350ml"]
+    res = await client.post("/public/quote", json=body(ids, overrides={str(coke): 14}))
+    assert res.status_code == 200
+    line = next(line for line in res.json()["lines"] if line["product_id"] == coke)
+    assert (line["packs"], line["line_total"]) == (14, 224000)
+
+
+async def test_below_minimum_is_a_flag_not_an_error(client, ids):
+    water = ids["products"]["Water 500ml"]
+    res = await client.post(
+        "/public/quote", json=custom_body(ids, items=[{"product_id": water, "packs": 1}])
+    )
+    assert res.status_code == 200
+    assert res.json()["flags"]["below_minimum"] is True
+
+
+async def test_inactive_product_in_a_custom_order_is_422(client, seeded_session, ids):
+    from app.models import Product
+
+    water = ids["products"]["Water 500ml"]
+    (await seeded_session.get(Product, water)).active = False
+    await seeded_session.commit()
+    res = await client.post(
+        "/public/quote", json=custom_body(ids, items=[{"product_id": water, "packs": 1}])
+    )
+    assert res.status_code == 422
+    assert str(water) in res.json()["detail"]
+
+
+async def test_inactive_product_is_left_out_of_a_package_quote(client, seeded_session, ids):
+    from app.models import Product
+
+    water = ids["products"]["Water 500ml"]
+    (await seeded_session.get(Product, water)).active = False
+    await seeded_session.commit()
+    res = await client.post("/public/quote", json=body(ids))
+    assert res.status_code == 200
+    assert water not in [line["product_id"] for line in res.json()["lines"]]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"guests": 0},
+        {"guests": -5},
+        {"hours": 0},
+        {"hours": 25},
+        {"package_id": None},  # neither package nor items
+        {"items": [{"product_id": 1, "packs": 1}]},  # both package and items
+        {"package_id": None, "items": []},
+        {"package_id": None, "items": [{"product_id": 1, "packs": 0}]},
+        {"package_id": None, "items": [{"product_id": 99999, "packs": 1}]},
+        {"package_id": None, "items": [{"product_id": 1, "packs": 1}, {"product_id": 1, "packs": 2}]},
+        {"overrides": {"1": -1}},
+        {"overrides": {"99999": 1}},
+        {"package_id": None, "items": [{"product_id": 1, "packs": 1}], "overrides": {"1": 2}},
+        {"addons": [{"addon_id": 1, "qty": 0}]},
+        {"addons": [{"addon_id": 1, "qty": 11}, {"addon_id": 1, "qty": 11}]},  # would dodge capacity
+        {"setup_at": "2030-01-01T15:00:00"},  # no timezone
+        {"collect_at": "2030-01-01T15:00:00"},  # no timezone
+    ],
+)
+async def test_invalid_quote_is_422(client, ids, change):
+    assert (await client.post("/public/quote", json=body(ids, **change))).status_code == 422
+
+
+@pytest.mark.parametrize("hours_later", [0, -1])
+async def test_collection_must_follow_setup(client, ids, hours_later):
+    res = await client.post(
+        "/public/quote",
+        json=body(
+            ids,
+            setup_at="2030-01-01T15:00:00+03:00",
+            collect_at=f"2030-01-01T{15 + hours_later}:00:00+03:00",
+        ),
+    )
+    assert res.status_code == 422
