@@ -4,6 +4,7 @@ from datetime import datetime, time, timedelta
 
 import pytest
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from app.models import (
@@ -13,6 +14,7 @@ from app.models import (
     BookingStatusHistory,
     Customer,
     Package,
+    Payment,
     PriceTier,
     Product,
     Setting,
@@ -20,10 +22,16 @@ from app.models import (
 )
 from app.services.availability import EAT, today_eat
 from app.services.bookings import (
+    BookingClosed,
     BookingRejected,
+    DuplicateReference,
     NewBooking,
+    NewPayment,
     create_booking,
+    find_booking,
     next_booking_code,
+    payment_summary,
+    submit_payment,
 )
 from app.services.pricing import QuoteError, QuoteRequest
 from app.services.quoting import compute_quote
@@ -251,6 +259,119 @@ async def test_changed_total_saves_nothing(seeded_session):
         "quote_changed",
     )
     assert rejected.quote.total == 1_806_500
+
+
+def payment(**overrides) -> NewPayment:
+    values = dict(kind="deposit", method="mpesa", amount=903_250, reference="abc123")
+    return NewPayment(**{**values, **overrides})
+
+
+@pytest.mark.parametrize("phone", ["0712345678", "255712345678", "+255 712 345 678"])
+async def test_find_booking_accepts_every_phone_format(seeded_session, phone):
+    booking = await create_booking(seeded_session, await new_booking(seeded_session))
+    found = await find_booking(seeded_session, booking.code, phone)
+    assert found.id == booking.id
+
+
+async def test_find_booking_ignores_case_and_spaces_in_the_number(seeded_session):
+    booking = await create_booking(seeded_session, await new_booking(seeded_session))
+    found = await find_booking(seeded_session, f" {booking.code.lower()} ", PHONE)
+    assert found.id == booking.id
+
+
+@pytest.mark.parametrize("code_ok, phone", [(True, "0799999999"), (True, "nonsense"), (False, "0712345678")])
+async def test_find_booking_returns_none_without_a_match(seeded_session, code_ok, phone):
+    booking = await create_booking(seeded_session, await new_booking(seeded_session))
+    code = booking.code if code_ok else "ED-1999-0001"
+    assert await find_booking(seeded_session, code, phone) is None
+
+
+async def test_submit_payment_is_pending_with_a_clean_reference(seeded_session):
+    booking = await create_booking(seeded_session, await new_booking(seeded_session))
+    saved = await submit_payment(seeded_session, booking, payment(reference="  abc123 "))
+    assert (saved.status, saved.reference, saved.amount, saved.kind, saved.method) == (
+        "pending", "ABC123", 903_250, "deposit", "mpesa",
+    )
+
+
+async def test_same_reference_is_refused_whatever_its_case(seeded_session):
+    booking = await create_booking(seeded_session, await new_booking(seeded_session))
+    await submit_payment(seeded_session, booking, payment(reference="abc123"))
+    with pytest.raises(DuplicateReference):
+        await submit_payment(seeded_session, booking, payment(reference="ABC123 ", amount=5))
+
+
+async def test_confirmed_reference_is_refused_too(seeded_session):
+    booking = await create_booking(seeded_session, await new_booking(seeded_session))
+    saved = await submit_payment(seeded_session, booking, payment())
+    saved.status = "confirmed"
+    await seeded_session.commit()
+    with pytest.raises(DuplicateReference):
+        await submit_payment(seeded_session, booking, payment())
+
+
+async def test_rejected_reference_can_be_sent_again(seeded_session):
+    booking = await create_booking(seeded_session, await new_booking(seeded_session))
+    saved = await submit_payment(seeded_session, booking, payment())
+    saved.status = "rejected"
+    await seeded_session.commit()
+    again = await submit_payment(seeded_session, booking, payment())
+    assert again.status == "pending"
+
+
+async def test_same_reference_on_another_booking_is_allowed(seeded_session):
+    first = await create_booking(seeded_session, await new_booking(seeded_session))
+    second = await create_booking(seeded_session, await new_booking(seeded_session))
+    await submit_payment(seeded_session, first, payment())
+    assert (await submit_payment(seeded_session, second, payment())).booking_id == second.id
+
+
+async def test_database_index_stops_a_double_tap(seeded_session):
+    """Two requests can both pass the read check; the index must still refuse the second."""
+    booking = await create_booking(seeded_session, await new_booking(seeded_session))
+    await submit_payment(seeded_session, booking, payment())
+    seeded_session.add(
+        Payment(booking_id=booking.id, kind="deposit", amount=1, method="mpesa", reference="ABC123")
+    )
+    with pytest.raises(IntegrityError):
+        await seeded_session.commit()
+    await seeded_session.rollback()
+
+
+async def test_amount_above_the_balance_is_accepted(seeded_session):
+    booking = await create_booking(seeded_session, await new_booking(seeded_session))
+    saved = await submit_payment(seeded_session, booking, payment(amount=99_000_000))
+    assert saved.amount == 99_000_000
+
+
+@pytest.mark.parametrize("status", ["cancelled", "closed"])
+async def test_payment_refused_on_finished_bookings(seeded_session, status):
+    booking = await create_booking(seeded_session, await new_booking(seeded_session))
+    booking.status = status
+    await seeded_session.commit()
+    with pytest.raises(BookingClosed):
+        await submit_payment(seeded_session, booking, payment())
+
+
+def test_payment_summary_counts_only_confirmed_deposit_and_balance():
+    payments = [
+        Payment(kind="deposit", amount=400, status="confirmed"),
+        Payment(kind="balance", amount=100, status="confirmed"),
+        Payment(kind="balance", amount=50, status="pending"),
+        Payment(kind="deposit", amount=70, status="rejected"),
+        Payment(kind="refund", amount=30, status="confirmed"),
+        Payment(kind="damage", amount=20, status="pending"),
+    ]
+    assert payment_summary(1000, payments) == (500, 50, 500)
+
+
+def test_payment_summary_balance_never_goes_below_zero():
+    payments = [Payment(kind="deposit", amount=1200, status="confirmed")]
+    assert payment_summary(1000, payments) == (1200, 0, 0)
+
+
+def test_payment_summary_with_nothing_paid():
+    assert payment_summary(1000, []) == (0, 0, 1000)
 
 
 async def test_order_with_no_drinks_is_refused(seeded_session):

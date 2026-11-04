@@ -1,10 +1,13 @@
 """Turn a quote into a saved booking. Nothing is written unless the server's own quote is valid."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, time, timezone
 
 from sqlalchemy import select, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models import (
     Booking,
@@ -12,10 +15,12 @@ from app.models import (
     BookingItem,
     BookingStatusHistory,
     Customer,
+    Payment,
     Product,
     Venue,
 )
 from app.services.availability import today_eat
+from app.services.phone import InvalidPhone, normalise_phone
 from app.services.pricing import Quote, QuoteError, QuoteRequest
 from app.services.quoting import compute_quote
 
@@ -44,6 +49,25 @@ class NewBooking:
     venue_name: str = ""
     venue_address: str = ""
 
+
+@dataclass(frozen=True)
+class NewPayment:
+    kind: str
+    method: str
+    amount: int
+    reference: str
+
+
+class DuplicateReference(Exception):
+    """This reference is already pending or confirmed on the booking."""
+
+
+class BookingClosed(Exception):
+    """The booking is cancelled or closed, so it takes no more payments."""
+
+
+FINISHED_STATUSES = ("cancelled", "closed")
+ORDER_PAYMENT_KINDS = ("deposit", "balance")
 
 _NEXT_NUMBER = text(
     "INSERT INTO booking_counters (year, last_no) VALUES (:year, 1) "
@@ -159,3 +183,66 @@ async def create_booking(session: AsyncSession, new: NewBooking) -> Booking:
     session.add(booking)
     await session.commit()
     return booking
+
+
+async def find_booking(session: AsyncSession, code: str, phone: str) -> Booking | None:
+    """The booking only if both the number and the phone match. Callers can't tell which failed."""
+    try:
+        normalised = normalise_phone(phone)
+    except InvalidPhone:
+        return None
+    return await session.scalar(
+        select(Booking)
+        .join(Booking.customer)
+        .where(Booking.code == code.strip().upper(), Customer.phone == normalised)
+        .options(
+            selectinload(Booking.customer),
+            selectinload(Booking.items).selectinload(BookingItem.product),
+            selectinload(Booking.addons).selectinload(BookingAddon.addon),
+            selectinload(Booking.payments),
+        )
+        .execution_options(populate_existing=True)
+    )
+
+
+async def _reference_in_use(session: AsyncSession, booking_id: int, reference: str) -> bool:
+    stmt = select(Payment.id).where(
+        Payment.booking_id == booking_id,
+        Payment.reference == reference,
+        Payment.status != "rejected",
+    )
+    return await session.scalar(stmt) is not None
+
+
+async def submit_payment(session: AsyncSession, booking: Booking, new: NewPayment) -> Payment:
+    """Save a pending payment for admin to confirm. The amount is the customer's claim, not checked."""
+    if booking.status in FINISHED_STATUSES:
+        raise BookingClosed(booking.code)
+    reference = new.reference.strip().upper()
+    if await _reference_in_use(session, booking.id, reference):
+        raise DuplicateReference(reference)
+
+    payment = Payment(
+        booking_id=booking.id,
+        kind=new.kind,
+        method=new.method,
+        amount=new.amount,
+        reference=reference,
+        status="pending",
+    )
+    session.add(payment)
+    try:
+        await session.commit()
+    except IntegrityError as exc:  # a double-tap got past the check above
+        await session.rollback()
+        raise DuplicateReference(reference) from exc
+    await session.refresh(payment)
+    return payment
+
+
+def payment_summary(total: int, payments: Iterable[Payment]) -> tuple[int, int, int]:
+    """(paid, pending, balance due). Derived from the records, never stored."""
+    towards_order = [p for p in payments if p.kind in ORDER_PAYMENT_KINDS]
+    paid = sum(p.amount for p in towards_order if p.status == "confirmed")
+    pending = sum(p.amount for p in towards_order if p.status == "pending")
+    return paid, pending, max(total - paid, 0)

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.db import get_session
-from app.models import Addon, Area, Package, Product, Venue, Zone
+from app.models import Addon, Area, Booking, Package, Product, Venue, Zone
 from app.schemas.public import (
     AddonOut,
     AreaOut,
@@ -16,15 +16,31 @@ from app.schemas.public import (
     BookingCreatedOut,
     BookingIn,
     PackageOut,
+    PaymentIn,
     PaymentInstructions,
+    PaymentOut,
     ProductOut,
     PublicSettingsOut,
     QuoteIn,
     QuoteOut,
+    TrackedAddonOut,
+    TrackedBookingOut,
+    TrackedItemOut,
+    TrackIn,
     VenueOut,
     ZoneOut,
 )
-from app.services.bookings import BookingRejected, NewBooking, create_booking
+from app.services.bookings import (
+    BookingClosed,
+    BookingRejected,
+    DuplicateReference,
+    NewBooking,
+    NewPayment,
+    create_booking,
+    find_booking,
+    payment_summary,
+    submit_payment,
+)
 from app.services.pricing import CatalogError, QuoteError, QuoteRequest
 from app.services.quoting import compute_quote
 from app.services.rate_limit import SlidingWindow
@@ -177,3 +193,82 @@ async def create_public_booking(body: BookingIn, request: Request, session: Sess
         payment_instructions=_payment_instructions(public),
         whatsapp_number=public["whatsapp_number"],
     )
+
+
+async def _lookup(session: AsyncSession, request: Request, code: str, phone: str) -> Booking:
+    """One answer for every miss, and only misses count towards the limit."""
+    ip = _client_ip(request)
+    if lookup_limiter.blocked(ip):
+        raise _too_many()
+    booking = await find_booking(session, code, phone)
+    if booking is None:
+        lookup_limiter.hit(ip)
+        raise HTTPException(status_code=404, detail="Booking not found")
+    return booking
+
+
+@router.post("/track", response_model=TrackedBookingOut)
+async def track(body: TrackIn, request: Request, session: Session):
+    booking = await _lookup(session, request, body.code, body.phone)
+    paid, pending, balance = payment_summary(booking.total, booking.payments)
+    public = await load_public_settings(session)
+    return TrackedBookingOut(
+        code=booking.code,
+        status=booking.status,
+        is_rush=booking.is_rush,
+        provisional=booking.delivery_fee_custom,
+        event_type=booking.event_type,
+        event_date=booking.event_date,
+        start_time=booking.start_time,
+        hours=booking.hours,
+        guests=booking.guests,
+        venue_name=booking.venue_name,
+        venue_address=booking.venue_address,
+        items=[
+            TrackedItemOut(
+                name_sw=item.product.name_sw,
+                name_en=item.product.name_en,
+                unit=item.product.unit,
+                qty=item.qty,
+                unit_price=item.unit_price,
+                line_total=item.qty * item.unit_price,
+            )
+            for item in booking.items
+        ],
+        addons=[
+            TrackedAddonOut(
+                name_sw=line.addon.name_sw,
+                name_en=line.addon.name_en,
+                qty=line.qty,
+                unit_price=line.unit_price,
+                line_total=line.qty * line.unit_price,
+            )
+            for line in booking.addons
+        ],
+        subtotal=booking.subtotal,
+        addons_total=booking.addons_total,
+        delivery_fee=booking.delivery_fee,
+        empties_deposit=booking.empties_deposit,
+        total=booking.total,
+        deposit_due=booking.deposit_due,
+        balance_due_date=booking.balance_due_date,
+        amount_paid=paid,
+        amount_pending=pending,
+        balance_due=balance,
+        payments=[PaymentOut.model_validate(p) for p in booking.payments],
+        payment_instructions=_payment_instructions(public),
+    )
+
+
+@router.post("/bookings/{code}/payments", response_model=PaymentOut, status_code=201)
+async def submit_payment_reference(code: str, body: PaymentIn, request: Request, session: Session):
+    booking = await _lookup(session, request, code, body.phone)
+    new = NewPayment(
+        kind=body.kind, method=body.method, amount=body.amount, reference=body.reference
+    )
+    try:
+        return await submit_payment(session, booking, new)
+    except DuplicateReference as exc:
+        raise HTTPException(status_code=409, detail={"code": "duplicate_reference"}) from exc
+    except BookingClosed as exc:
+        raise HTTPException(status_code=409, detail={"code": "booking_closed"}) from exc

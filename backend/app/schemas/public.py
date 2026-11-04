@@ -1,6 +1,6 @@
 """Public API shapes (contracts/public-api.md). Nothing here may carry a cost field."""
 
-from datetime import date, time
+from datetime import date, datetime, time
 from typing import Annotated, Literal
 
 from pydantic import (
@@ -230,3 +230,71 @@ class BookingCreatedOut(BaseModel):
     balance_due_date: date
     payment_instructions: PaymentInstructions
     whatsapp_number: str
+
+
+# Lookups accept any text up to these lengths: a badly formed phone must read as "not found".
+class TrackIn(BaseModel):
+    code: str = Field(max_length=40)
+    phone: str = Field(max_length=40)
+
+
+class PaymentIn(BaseModel):
+    phone: str = Field(max_length=40)
+    kind: Literal["deposit", "balance"]
+    method: Literal["mpesa", "tigopesa", "airtel", "bank"]
+    amount: int = Field(ge=1)
+    reference: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)]
+
+
+class PaymentOut(_FromAttributes):
+    kind: str
+    amount: int
+    method: str
+    reference: str
+    status: str
+    created_at: datetime
+
+
+class TrackedItemOut(BaseModel):
+    name_sw: str
+    name_en: str
+    unit: str
+    qty: int
+    unit_price: int
+    line_total: int
+
+
+class TrackedAddonOut(BaseModel):
+    name_sw: str
+    name_en: str
+    qty: int
+    unit_price: int
+    line_total: int
+
+
+class TrackedBookingOut(BaseModel):
+    code: str
+    status: str
+    is_rush: bool
+    provisional: bool
+    event_type: str
+    event_date: date
+    start_time: time
+    hours: int
+    guests: int
+    venue_name: str
+    venue_address: str
+    items: list[TrackedItemOut]
+    addons: list[TrackedAddonOut]
+    subtotal: int
+    addons_total: int
+    delivery_fee: int
+    empties_deposit: int
+    total: int
+    deposit_due: int
+    balance_due_date: date
+    amount_paid: int
+    amount_pending: int
+    balance_due: int
+    payments: list[PaymentOut]
+    payment_instructions: PaymentInstructions

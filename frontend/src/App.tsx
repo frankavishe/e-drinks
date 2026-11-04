@@ -5,6 +5,7 @@ import BookingWizard from './pages/book/BookingWizard'
 import ComingSoon from './pages/ComingSoon'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import Track from './pages/Track'
 
 const queryClient = new QueryClient()
 
@@ -17,6 +18,7 @@ export default function App() {
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
             <Route path="book" element={<BookingWizard />} />
+            <Route path="track" element={<Track />} />
             <Route path="*" element={<ComingSoon />} />
           </Route>
         </Routes>
