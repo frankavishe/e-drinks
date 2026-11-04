@@ -363,3 +363,30 @@ async def test_changing_min_order_changes_the_next_quote(client, seeded_session,
     flags = (await client.post("/public/quote", json=custom_body(ids))).json()["flags"]
     assert flags["below_minimum"] is True
     assert flags["min_order"] == 500000
+
+
+# --- T024: unlisted area ---------------------------------------------------------------------
+
+
+async def test_custom_area_quote_is_provisional(client, ids):
+    res = await client.post("/public/quote", json=body(ids, area_id=None, custom_area="Bagamoyo"))
+    assert res.status_code == 200
+    q = res.json()
+    assert q["delivery_fee"] == 0
+    assert q["delivery_custom"] is True
+    assert q["flags"]["provisional"] is True
+    assert q["total"] == 1691500  # the Silver total without the 25,000 delivery
+    assert q["deposit_due"] == 845750
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"custom_area": "Bagamoyo"},  # both area_id and custom_area
+        {"area_id": None},  # neither
+        {"area_id": None, "custom_area": "   "},
+        {"area_id": 99999},
+    ],
+)
+async def test_invalid_area_is_422(client, ids, change):
+    assert (await client.post("/public/quote", json=body(ids, **change))).status_code == 422

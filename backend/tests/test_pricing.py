@@ -332,3 +332,25 @@ def test_has_staff_addon(addons, expected):
 def test_is_rush_is_passed_through_to_the_flags():
     assert quote(request(), is_rush=True).flags.is_rush is True
     assert quote(request(), is_rush=False).flags.is_rush is False
+
+
+# --- T024: unlisted area ---------------------------------------------------------------------
+
+
+def test_custom_area_has_no_delivery_fee_and_is_provisional():
+    q = quote(request(area_id=None, custom_area="Bagamoyo"))
+    assert q.delivery_fee == 0
+    assert q.delivery_custom is True
+    assert q.flags.provisional is True
+
+
+def test_custom_area_total_and_deposit_exclude_delivery():
+    q = quote(request(area_id=None, custom_area="Bagamoyo"))
+    assert q.total == 892000 + 180000
+    assert q.deposit_due == 536000
+
+
+def test_listed_area_is_not_provisional():
+    q = quote(request())
+    assert q.delivery_custom is False
+    assert q.flags.provisional is False

@@ -225,6 +225,8 @@ def _addon_lines(
 
 
 def _delivery_fee(req: QuoteRequest, catalog: Catalog) -> int:
+    if req.custom_area is not None:
+        return 0  # quoted by hand later; the total is provisional until then
     if req.area_id not in catalog.area_fees:
         raise QuoteError(f"Unknown area {req.area_id}")
     return catalog.area_fees[req.area_id]
@@ -245,6 +247,7 @@ def build_quote(
     empties_deposit = sum(line.empties_deposit for line in lines)
     delivery_fee = _delivery_fee(req, catalog)
     total = subtotal + addons_total + delivery_fee + empties_deposit
+    delivery_custom = req.custom_area is not None
 
     return Quote(
         lines=lines,
@@ -252,7 +255,7 @@ def build_quote(
         subtotal=subtotal,
         addons_total=addons_total,
         delivery_fee=delivery_fee,
-        delivery_custom=False,
+        delivery_custom=delivery_custom,
         empties_deposit=empties_deposit,
         total=total,
         deposit_due=-(-total * settings.deposit_percent // 100),  # integer ceiling
@@ -261,7 +264,7 @@ def build_quote(
             is_rush=is_rush,
             below_minimum=subtotal + addons_total < settings.min_order,
             min_order=settings.min_order,
-            provisional=False,
+            provisional=delivery_custom,
             addons_unavailable=tuple(line.addon_id for line in addon_lines if not line.ok),
         ),
     )

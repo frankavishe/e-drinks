@@ -88,8 +88,8 @@ run it and see it fail, then implement.
 
 ## Phase 7: User Story 5 - Unlisted area (P3)
 
-- [ ] T024 [US5] Test-first in `backend/tests/test_pricing.py` + `test_public_api.py`: `custom_area` → delivery_fee 0, delivery_custom + provisional true, deposit on provisional total; both area_id and custom_area → 422; unknown area_id → 422
-- [ ] T025 [US5] Implement custom-area handling in `backend/app/services/pricing.py` and `backend/app/routers/public.py`
+- [X] T024 [US5] Test-first in `backend/tests/test_pricing.py` + `test_public_api.py`: `custom_area` → delivery_fee 0, delivery_custom + provisional true, deposit on provisional total; both area_id and custom_area → 422; unknown area_id → 422
+- [X] T025 [US5] Implement custom-area handling in `backend/app/services/pricing.py` and `backend/app/routers/public.py`
 
 ---
 
