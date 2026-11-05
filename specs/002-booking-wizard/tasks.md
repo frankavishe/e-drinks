@@ -97,8 +97,8 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 ## Phase 7: Polish
 
 - [X] T026 [P] Vitest in `frontend/src/i18n/i18n.test.ts`: `sw.json` and `en.json` have identical keys
-- [ ] T027 Run the full suites plus `npm run build` and `npm run lint`; run the migration on a throwaway SQLite file and review the offline Postgres SQL
-- [ ] T028 Walk through `specs/002-booking-wizard/quickstart.md` in a browser at phone width against a throwaway database; record the results and what wasn't exercised
+- [X] T027 Run the full suites plus `npm run build` and `npm run lint`; run the migration on a throwaway SQLite file and review the offline Postgres SQL
+- [X] T028 Walk through `specs/002-booking-wizard/quickstart.md` in a browser at phone width against a throwaway database; record the results and what wasn't exercised
 
 ---
 

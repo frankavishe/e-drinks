@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 
-const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api'
+// `||`, not `??`: .env.example leaves this blank, which must still mean the dev proxy.
+const BASE = (import.meta.env.VITE_API_URL as string | undefined) || '/api'
 
 export class ApiError extends Error {
   status: number
