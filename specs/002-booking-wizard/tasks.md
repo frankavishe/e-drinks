@@ -74,12 +74,12 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 **Independent Test**: right phone shows details; wrong phone is not found; a deposit reference shows as pending.
 
-- [ ] T018 [US3] Test-first in `backend/tests/test_bookings.py`: `find_booking` across phone formats; `submit_payment` trims and upper-cases, rejects duplicates, allows a rejected reference again, accepts oversized amounts, refuses cancelled and closed bookings; `payment_summary` counts only confirmed deposit and balance as paid
-- [ ] T019 [US3] Implement `find_booking`, `submit_payment`, `payment_summary` in `backend/app/services/bookings.py`
-- [ ] T020 [US3] Test-first: `backend/tests/test_tracking_api.py`. Identical `404`s for unknown number, wrong phone and invalid phone; response shape with no cost fields; payment `201`, duplicate `409`; failed-lookup rate limit on both endpoints, and successes not counted
-- [ ] T021 [US3] Add schemas and `POST /public/track`, `POST /public/bookings/{code}/payments` in `backend/app/schemas/public.py` and `backend/app/routers/public.py`
-- [ ] T022 [US3] Vitest in `frontend/src/pages/Track.test.tsx`: not-found message; details shown; a submitted reference shows as pending; duplicate message
-- [ ] T023 [US3] Implement `frontend/src/pages/Track.tsx`, `frontend/src/pages/PaymentForm.tsx`, the `/track` route and strings
+- [X] T018 [US3] Test-first in `backend/tests/test_bookings.py`: `find_booking` across phone formats; `submit_payment` trims and upper-cases, rejects duplicates, allows a rejected reference again, accepts oversized amounts, refuses cancelled and closed bookings; `payment_summary` counts only confirmed deposit and balance as paid
+- [X] T019 [US3] Implement `find_booking`, `submit_payment`, `payment_summary` in `backend/app/services/bookings.py`
+- [X] T020 [US3] Test-first: `backend/tests/test_tracking_api.py`. Identical `404`s for unknown number, wrong phone and invalid phone; response shape with no cost fields; payment `201`, duplicate `409`; failed-lookup rate limit on both endpoints, and successes not counted
+- [X] T021 [US3] Add schemas and `POST /public/track`, `POST /public/bookings/{code}/payments` in `backend/app/schemas/public.py` and `backend/app/routers/public.py`
+- [X] T022 [US3] Vitest in `frontend/src/pages/Track.test.tsx`: not-found message; details shown; a submitted reference shows as pending; duplicate message
+- [X] T023 [US3] Implement `frontend/src/pages/Track.tsx`, `frontend/src/pages/PaymentForm.tsx`, the `/track` route and strings
 
 ---
 
@@ -89,14 +89,14 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 **Independent Test**: with email in test mode, a booking and a reference record two notifications with the booking number.
 
-- [ ] T024 [US4] Test-first: `backend/tests/test_notify.py`. Contents per the contract table; customer email in the booking's language and free of customer-typed text; business emails in both languages; no customer email without an address; sender failure is logged and the booking or payment is still saved; empty API key logs instead of sending
-- [ ] T025 [US4] Implement `backend/app/services/notify.py` and queue emails with `BackgroundTasks` in `backend/app/routers/public.py`
+- [X] T024 [US4] Test-first: `backend/tests/test_notify.py`. Contents per the contract table; customer email in the booking's language and free of customer-typed text; business emails in both languages; no customer email without an address; sender failure is logged and the booking or payment is still saved; empty API key logs instead of sending
+- [X] T025 [US4] Implement `backend/app/services/notify.py` and queue emails with `BackgroundTasks` in `backend/app/routers/public.py`
 
 ---
 
 ## Phase 7: Polish
 
-- [ ] T026 [P] Vitest in `frontend/src/i18n/i18n.test.ts`: `sw.json` and `en.json` have identical keys
+- [X] T026 [P] Vitest in `frontend/src/i18n/i18n.test.ts`: `sw.json` and `en.json` have identical keys
 - [ ] T027 Run the full suites plus `npm run build` and `npm run lint`; run the migration on a throwaway SQLite file and review the offline Postgres SQL
 - [ ] T028 Walk through `specs/002-booking-wizard/quickstart.md` in a browser at phone width against a throwaway database; record the results and what wasn't exercised
 

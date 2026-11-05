@@ -1,9 +1,11 @@
 import httpx
 import pytest
 import pytest_asyncio
+import resend
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 import app.models  # noqa: F401
+from app.config import get_settings
 from app.db import Base, get_session
 from app.main import app as fastapi_app
 from app.routers.public import booking_limiter, lookup_limiter
@@ -14,6 +16,17 @@ from app.seed import seed
 def reset_rate_limits():
     booking_limiter.clear()
     lookup_limiter.clear()
+
+
+@pytest.fixture(autouse=True)
+def sent_emails(monkeypatch):
+    """Records what would be sent. No test can reach Resend, whatever backend/.env holds."""
+    sent: list[dict] = []
+    monkeypatch.setattr(resend.Emails, "send", lambda params: sent.append(params))
+    settings = get_settings()
+    monkeypatch.setattr(settings, "resend_api_key", "test-key")
+    monkeypatch.setattr(settings, "admin_email", "admin@example.test")
+    return sent
 
 
 @pytest_asyncio.fixture

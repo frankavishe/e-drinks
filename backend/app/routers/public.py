@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -41,10 +41,16 @@ from app.services.bookings import (
     payment_summary,
     submit_payment,
 )
+from app.services.notify import (
+    booking_to_business,
+    booking_to_customer,
+    payment_to_business,
+    send_email,
+)
 from app.services.pricing import CatalogError, QuoteError, QuoteRequest
 from app.services.quoting import compute_quote
 from app.services.rate_limit import SlidingWindow
-from app.services.settings_store import load_public_settings
+from app.services.settings_store import load_notification_email, load_public_settings
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -152,7 +158,9 @@ async def public_settings(session: Session):
 
 
 @router.post("/bookings", response_model=BookingCreatedOut, status_code=201)
-async def create_public_booking(body: BookingIn, request: Request, session: Session):
+async def create_public_booking(
+    body: BookingIn, request: Request, session: Session, background: BackgroundTasks
+):
     ip = _client_ip(request)
     if booking_limiter.blocked(ip):
         raise _too_many()
@@ -182,6 +190,10 @@ async def create_public_booking(body: BookingIn, request: Request, session: Sess
     booking_limiter.hit(ip)
 
     public = await load_public_settings(session)
+    business = await load_notification_email(session)
+    background.add_task(send_email, booking_to_business(business, booking, body.name, body.phone))
+    if body.email:
+        background.add_task(send_email, booking_to_customer(body.email, booking, public))
     return BookingCreatedOut(
         code=booking.code,
         status=booking.status,
@@ -261,14 +273,19 @@ async def track(body: TrackIn, request: Request, session: Session):
 
 
 @router.post("/bookings/{code}/payments", response_model=PaymentOut, status_code=201)
-async def submit_payment_reference(code: str, body: PaymentIn, request: Request, session: Session):
+async def submit_payment_reference(
+    code: str, body: PaymentIn, request: Request, session: Session, background: BackgroundTasks
+):
     booking = await _lookup(session, request, code, body.phone)
     new = NewPayment(
         kind=body.kind, method=body.method, amount=body.amount, reference=body.reference
     )
     try:
-        return await submit_payment(session, booking, new)
+        payment = await submit_payment(session, booking, new)
     except DuplicateReference as exc:
         raise HTTPException(status_code=409, detail={"code": "duplicate_reference"}) from exc
     except BookingClosed as exc:
         raise HTTPException(status_code=409, detail={"code": "booking_closed"}) from exc
+    business = await load_notification_email(session)
+    background.add_task(send_email, payment_to_business(business, booking.code, payment))
+    return payment

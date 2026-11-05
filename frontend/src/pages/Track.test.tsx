@@ -86,7 +86,7 @@ describe('Track', () => {
     await lookUp()
     expect(await screen.findByText('ED-2030-0001')).toBeInTheDocument()
     expect(screen.getByText(t('status.request'))).toBeInTheDocument()
-    expect(screen.getByText('Soda')).toBeInTheDocument()
+    expect(screen.getByText('10 x Soda')).toBeInTheDocument()
     expect(screen.getAllByText('TSh 245,000').length).toBeGreaterThan(0)
     expect(screen.getByText('123456')).toBeInTheDocument()
     expect(screen.getByText(t('track.noPayments'))).toBeInTheDocument()
