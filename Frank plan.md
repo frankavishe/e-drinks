@@ -75,7 +75,7 @@ The owner sells drinks in bulk (soft drinks + alcohol, licensed) to weddings and
 - `pytest` in `backend/`: pricing tiers, package rounding, zone fees, empties deposit, 50% deposit, cancellation refund at 15/10/3 days, commission only on Close, add-on overbooking blocked across overlapping setup→collect windows, stock reserve/shortfall.
 - Run the API (`uvicorn`) + frontend (`npm run dev`) against a Supabase dev project. End-to-end check:
   1. Book a 300-guest Silver wedding at a Masaki venue → correct quote → submit → WhatsApp link holds the booking number.
-  2. Submit a deposit reference → admin confirms → status is Confirmed, stock is reserved, the purchase list shows any shortfall.
+  2. Submit a deposit reference → admin confirms it → admin moves the booking to Confirmed → stock is reserved, the purchase list shows any shortfall.
   3. Try to book more coolers than owned on an overlapping date → blocked.
   4. Mark Delivered → enter returns and empties → Returns settled → Closed → planner commission is earned.
   5. Download the invoice PDF in Swahili and English; tracking page works with booking number + phone.

@@ -49,11 +49,18 @@ deposit → refused; cancel 10 days before → refund shown as 50% of the deposi
 2. **Given** confirmed payments ≥ 50% of total, **Then** the move to Confirmed is allowed; otherwise refused.
 3. **Given** confirmed payments = total, **Then** the move to Fully paid is allowed.
 4. **Given** a cancellation, **Then** the refund due follows policy: 14+ days → deposit minus 10%;
-   7–13 days → 50%; under 7 days → nothing, and a refund payment record can be created.
+   7–13 days → 50%; under 7 days → nothing, plus anything paid above the deposit in full, and a
+   refund payment record can be created.
 5. **Given** a first date change made 7+ days before the event, **Then** it is free; a second
    change or a change inside 7 days is refused, or recorded as an exception by the owner.
 6. **Given** every stage change, **Then** a history entry records stage, time and actor.
 7. **Given** a rush request, **When** approved, **Then** it can proceed like a normal booking.
+8. **Given** a rush request, **When** declined, **Then** the booking is cancelled and everything
+   paid is due back in full.
+9. **Given** a booking with a provisional delivery fee, **When** admin sets the fee, **Then** the
+   total and deposit update; until then it cannot move forward.
+10. **Given** the owner, **When** moving a booking back one stage with a note, **Then** it is allowed
+    and recorded; staff are refused.
 
 ---
 
@@ -94,6 +101,8 @@ add-ons and capacities, zones with delivery fees, areas, saved venues and busine
 - Rejecting a payment that was already used to move to Confirmed → refused unless the stage is moved back first.
 - Deleting a product used in bookings → not allowed; deactivate instead.
 - Overlapping tiers for a product → rejected on save.
+- Moving to Confirmed when the add-ons have since been taken → refused.
+- Cancelling or declining with a payment still pending → refused until it is confirmed or rejected.
 
 ## Requirements *(mandatory)*
 
@@ -111,6 +120,10 @@ add-ons and capacities, zones with delivery fees, areas, saved venues and busine
 - **FR-010**: Staff MUST NOT see cost, margin or profit, and MUST NOT edit settings or cost prices.
 - **FR-011**: Admin can record the EFD receipt number and internal notes on a booking.
 - **FR-012**: Admin UI MUST be available in Swahili and English.
+- **FR-013**: Admin MUST be able to set the delivery fee on a provisional booking in Request or
+  Quoted, which recalculates the total and deposit.
+- **FR-014**: System MUST re-check add-on capacity on the move to Confirmed.
+- **FR-015**: Only the owner MAY move a booking back a stage, one step at a time, with a note.
 
 ### Key Entities
 
@@ -131,3 +144,5 @@ add-ons and capacities, zones with delivery fees, areas, saved venues and busine
 - Staff and owner accounts are created by the owner (planner self-signup is feature 005).
 - Stock reservation on Confirm, and settlement on Delivered/Returns, come in feature 004.
 - "Quoted" means admin sent a reviewed quote to a customer whose request needed adjustment.
+- Confirming a payment does not move the stage; moving is a separate action offered right after.
+- A product image is a URL; uploading files is out of scope.
