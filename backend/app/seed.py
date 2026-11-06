@@ -1,7 +1,8 @@
 """Idempotent sample data: settings, catalog, packages, add-ons, Dar es Salaam zones/areas.
 
-Run:  python -m app.seed [--owner-email you@example.com]
-The owner email must already exist in Supabase Auth (Auth → Users); its id becomes the owner profile.
+Run:  python -m app.seed [--owner-email you@example.com] [--staff-email them@example.com]
+Each email must already exist in Supabase Auth (Auth → Users); its id becomes the profile's id.
+An email that already has a profile keeps its role.
 All prices are TZS, VAT-inclusive, and are samples for the owner to edit.
 """
 
@@ -121,7 +122,11 @@ async def _get_one(session: AsyncSession, stmt):
 
 
 async def seed(
-    session: AsyncSession, owner_id: uuid.UUID | None = None, owner_email: str = ""
+    session: AsyncSession,
+    owner_id: uuid.UUID | None = None,
+    owner_email: str = "",
+    staff_id: uuid.UUID | None = None,
+    staff_email: str = "",
 ) -> None:
     for key, value in SETTINGS.items():
         if await session.get(Setting, key) is None:
@@ -181,23 +186,34 @@ async def seed(
 
     if owner_id is not None and await session.get(Profile, owner_id) is None:
         session.add(Profile(id=owner_id, role="owner", name="Owner", email=owner_email))
+    if staff_id is not None and await session.get(Profile, staff_id) is None:
+        session.add(Profile(id=staff_id, role="staff", name="Staff", email=staff_email))
 
     await session.commit()
 
 
-async def _main(owner_email: str | None) -> None:
+async def _auth_user_id(session: AsyncSession, email: str | None) -> uuid.UUID | None:
+    if not email:
+        return None
+    row = (await session.execute(
+        text("select id from auth.users where email = :e"), {"e": email}
+    )).first()
+    if row is None:
+        raise SystemExit(f"No Supabase Auth user with email {email}; create it first.")
+    return row[0]
+
+
+async def _main(owner_email: str | None, staff_email: str | None) -> None:
     from app.db import SessionLocal, engine
 
     async with SessionLocal() as session:
-        owner_id = None
-        if owner_email:
-            row = (await session.execute(
-                text("select id from auth.users where email = :e"), {"e": owner_email}
-            )).first()
-            if row is None:
-                raise SystemExit(f"No Supabase Auth user with email {owner_email}; create it first.")
-            owner_id = row[0]
-        await seed(session, owner_id=owner_id, owner_email=owner_email or "")
+        await seed(
+            session,
+            owner_id=await _auth_user_id(session, owner_email),
+            owner_email=owner_email or "",
+            staff_id=await _auth_user_id(session, staff_email),
+            staff_email=staff_email or "",
+        )
     await engine.dispose()
     print("Seed complete.")
 
@@ -205,4 +221,6 @@ async def _main(owner_email: str | None) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--owner-email")
-    asyncio.run(_main(parser.parse_args().owner_email))
+    parser.add_argument("--staff-email")
+    args = parser.parse_args()
+    asyncio.run(_main(args.owner_email, args.staff_email))

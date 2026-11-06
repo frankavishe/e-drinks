@@ -39,3 +39,20 @@ async def test_seed_creates_owner_profile_when_given(session):
     owner = await session.get(Profile, uid)
     assert owner.role == "owner"
     assert await count(session, Profile) == 1
+
+
+async def test_seed_creates_staff_profile_when_given(session):
+    uid = uuid.uuid4()
+    await seed(session, staff_id=uid, staff_email="staff@example.com")
+    await seed(session, staff_id=uid, staff_email="staff@example.com")
+    staff = await session.get(Profile, uid)
+    assert staff.role == "staff"
+    assert staff.email == "staff@example.com"
+    assert await count(session, Profile) == 1
+
+
+async def test_seed_does_not_demote_an_existing_owner_to_staff(session):
+    uid = uuid.uuid4()
+    await seed(session, owner_id=uid, owner_email="both@example.com")
+    await seed(session, staff_id=uid, staff_email="both@example.com")
+    assert (await session.get(Profile, uid)).role == "owner"

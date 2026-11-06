@@ -5,10 +5,10 @@ from sqlalchemy import func, select
 
 from app.models import Booking, Customer
 from app.routers.public import booking_limiter
-from tests.test_public_api import assert_no_cost, body, ids  # noqa: F401  (ids is a fixture)
+from tests.test_public_api import FAR_AHEAD, assert_no_cost, body, ids  # noqa: F401  (ids is a fixture)
 
 
-async def booking_body(client, ids, **overrides):
+async def booking_body(client, ids, days=FAR_AHEAD, **overrides):
     values = {
         "event_type": "wedding",
         "start_time": "16:00:00",
@@ -19,7 +19,7 @@ async def booking_body(client, ids, **overrides):
         "age_confirmed": True,
     }
     quote_fields = {k: v for k, v in overrides.items() if k in QUOTE_FIELDS}
-    quote_input = body(ids, **quote_fields)
+    quote_input = body(ids, days=days, **quote_fields)
     res = await client.post("/public/quote", json=quote_input)
     assert res.status_code == 200, res.text
     other = {k: v for k, v in overrides.items() if k not in QUOTE_FIELDS}

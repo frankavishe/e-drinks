@@ -21,17 +21,17 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 ## Phase 1: Setup
 
-- [ ] T001 Run `pytest` in `backend/` and `npm test` in `frontend/` to confirm both suites are green before starting
+- [X] T001 Run `pytest` in `backend/` and `npm test` in `frontend/` to confirm both suites are green before starting
 
 ---
 
 ## Phase 2: Foundational (blocks all stories)
 
-- [ ] T002 Add `refund_due` and `internal_notes` to `Booking` in `backend/app/models/booking.py`
-- [ ] T003 Write the Alembic migration in `backend/alembic/versions/` with a working downgrade
-- [ ] T004 Add `--staff-email` to `backend/app/seed.py`, with a test in `backend/tests/test_seed.py`
-- [ ] T005 Test-first: `backend/tests/test_admin_api.py`. `/admin/me` returns `401` with no token, `403` for planners, and the profile for staff and owner
-- [ ] T006 Create `backend/app/routers/admin.py` with `/admin/me` and `backend/app/schemas/admin.py`; mount in `backend/app/main.py`
+- [X] T002 Add `refund_due` and `internal_notes` to `Booking` in `backend/app/models/booking.py`
+- [X] T003 Write the Alembic migration in `backend/alembic/versions/` with a working downgrade
+- [X] T004 Add `--staff-email` to `backend/app/seed.py`, with a test in `backend/tests/test_seed.py`
+- [X] T005 Test-first: `backend/tests/test_admin_api.py`. `/admin/me` returns `401` with no token, `403` for planners, and the profile for staff and owner
+- [X] T006 Create `backend/app/routers/admin.py` with `/admin/me` and `backend/app/schemas/admin.py`; mount in `backend/app/main.py`
 
 **Checkpoint**: the admin router exists and is gated.
 
@@ -43,9 +43,9 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 **Independent Test**: log in as staff, find a booking by number and by phone, open it and see payments and history.
 
-- [ ] T007 [US1] Test-first in `backend/tests/test_admin_api.py`: overview splits today and upcoming in EAT and leaves out cancelled and closed; list filters by stage, date range and rush; search by number, name and phone in any format; paging; detail holds items, add-ons, payments and history; `PATCH` saves EFD number and internal notes (FR-011); internal notes absent from `/public/track`
-- [ ] T008 [US1] Test-first in `backend/tests/test_admin_api.py`: walk every staff booking response and fail on any key containing `cost`, `profit` or `margin`; owner detail has `financials` with profit excluding the empties deposit and using snapshotted costs
-- [ ] T009 [US1] Implement `backend/app/services/admin_queries.py`, booking schemas in `backend/app/schemas/admin.py`, and the overview, list, detail and `PATCH` endpoints
+- [X] T007 [US1] Test-first in `backend/tests/test_admin_api.py`: overview splits today and upcoming in EAT and leaves out cancelled and closed; list filters by stage, date range and rush; search by number, name and phone in any format; paging; detail holds items, add-ons, payments and history; `PATCH` saves EFD number and internal notes (FR-011); internal notes absent from `/public/track`
+- [X] T008 [US1] Test-first in `backend/tests/test_admin_api.py`: walk every staff booking response and fail on any key containing `cost`, `profit` or `margin`; owner detail has `financials` with profit excluding the empties deposit and using snapshotted costs
+- [X] T009 [US1] Implement `backend/app/services/admin_queries.py`, booking schemas in `backend/app/schemas/admin.py`, and the overview, list, detail and `PATCH` endpoints
 
 **Checkpoint**: bookings readable through the API, with the role boundary tested.
 

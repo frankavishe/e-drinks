@@ -103,7 +103,9 @@ class Booking(Base):
     efd_receipt_no: Mapped[str] = mapped_column(String(60), default="")
     policy_accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     age_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
-    notes: Mapped[str] = mapped_column(Text, default="")
+    notes: Mapped[str] = mapped_column(Text, default="")  # what the customer typed
+    internal_notes: Mapped[str] = mapped_column(Text, default="", server_default="")  # staff only
+    refund_due: Mapped[int | None] = mapped_column(BigInteger)  # fixed when cancelled
     client_name: Mapped[str] = mapped_column(String(120), default="")  # planner's named client
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
