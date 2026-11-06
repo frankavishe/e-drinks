@@ -79,7 +79,7 @@ are for the owner's response only; the staff response has no such keys.
   }]
 }
 ```
-Every day in the range appears. `addons` lists only add-ons in use that day. `owned` is null for unlimited.
+Every day in the range appears. `bookings` leaves out cancelled bookings. `addons` lists only add-ons in use that day. `owned` is null for unlimited.
 
 ## Catalog (read: staff and owner; write: owner)
 

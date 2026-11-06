@@ -86,6 +86,17 @@ async def list_bookings(session: AsyncSession, filters: BookingFilters) -> tuple
     return total, list(rows)
 
 
+async def calendar_bookings(session: AsyncSession, first: date, last: date) -> list[Booking]:
+    """Bookings with an event from first to last, earliest first. Cancelled ones are left out."""
+    rows = await session.scalars(
+        select(Booking)
+        .where(Booking.event_date >= first, Booking.event_date <= last, Booking.status != "cancelled")
+        .options(selectinload(Booking.customer))
+        .order_by(Booking.event_date, Booking.start_time, Booking.id)
+    )
+    return list(rows)
+
+
 async def overview(session: AsyncSession, today: date) -> tuple[list[Booking], list[Booking]]:
     """(today's events, those in the next UPCOMING_DAYS days). Finished bookings are left out."""
     rows = list(await session.scalars(

@@ -1,5 +1,6 @@
 """Staff and owner endpoints. The router-level check means no route here can be left open."""
 
+from collections import defaultdict
 from datetime import date
 from typing import Annotated
 
@@ -20,6 +21,10 @@ from app.schemas.admin import (
     BookingPatch,
     BookingResponse,
     BookingRow,
+    CalendarAddon,
+    CalendarBooking,
+    CalendarDay,
+    CalendarOut,
     CancelIn,
     CancelPreviewOut,
     DateChangeIn,
@@ -37,13 +42,14 @@ from app.schemas.admin import (
 from app.services.admin_queries import (
     BookingFilters,
     actor_names,
+    calendar_bookings,
     financials,
     list_bookings,
     load_booking,
     overview,
     refunded_total,
 )
-from app.services.availability import today_eat
+from app.services.availability import daily_usage, today_eat
 from app.services.booking_flow import (
     NewRefund,
     add_refund,
@@ -58,6 +64,8 @@ from app.services.booking_flow import (
     set_delivery_fee,
 )
 from app.services.bookings import payment_summary
+
+MAX_CALENDAR_DAYS = 62
 
 staff_or_owner = require_role("staff", "owner")
 
@@ -191,6 +199,40 @@ async def _found(session: AsyncSession, booking_id: int, *, lock: bool = False) 
 async def get_overview(session: Session):
     today, upcoming = await overview(session, today_eat())
     return OverviewOut(today=[_row(b) for b in today], upcoming=[_row(b) for b in upcoming])
+
+
+@router.get("/calendar", response_model=CalendarOut)
+async def get_calendar(
+    session: Session,
+    first: Annotated[date, Query(alias="from")],
+    last: Annotated[date, Query(alias="to")],
+):
+    if not 1 <= (last - first).days + 1 <= MAX_CALENDAR_DAYS:
+        raise HTTPException(status_code=422, detail=f"Range must be 1 to {MAX_CALENDAR_DAYS} days")
+
+    bookings: dict[date, list[CalendarBooking]] = defaultdict(list)
+    for booking in await calendar_bookings(session, first, last):
+        bookings[booking.event_date].append(
+            CalendarBooking(
+                id=booking.id,
+                code=booking.code,
+                status=booking.status,
+                is_rush=booking.is_rush,
+                customer_name=booking.customer.name,
+                start_time=booking.start_time,
+            )
+        )
+    usage = await daily_usage(session, first, last)
+    return CalendarOut(
+        days=[
+            CalendarDay(
+                date=day,
+                bookings=bookings[day],
+                addons=[CalendarAddon.model_validate(line) for line in lines],
+            )
+            for day, lines in usage.items()
+        ]
+    )
 
 
 @router.get("/bookings", response_model=BookingListOut)

@@ -190,3 +190,32 @@ class RefundIn(BaseModel):
     amount: int = Field(ge=1)
     method: Literal["mpesa", "tigopesa", "airtel", "bank", "cash"]
     reference: Annotated[str, StringConstraints(strip_whitespace=True, max_length=80)] = ""
+
+
+class CalendarBooking(BaseModel):
+    id: int
+    code: str
+    status: str
+    is_rush: bool
+    customer_name: str
+    start_time: time
+
+
+class CalendarAddon(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    addon_id: int
+    name_sw: str
+    name_en: str
+    committed: int
+    owned: int | None
+
+
+class CalendarDay(BaseModel):
+    date: date
+    bookings: list[CalendarBooking]
+    addons: list[CalendarAddon]
+
+
+class CalendarOut(BaseModel):
+    days: list[CalendarDay]

@@ -91,8 +91,8 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 **Independent Test**: two bookings on one Saturday → the calendar shows both and combined add-on usage.
 
-- [ ] T026 [US3] Test-first: `backend/tests/test_admin_calendar.py`. Every day in range appears; two bookings combine; a multi-day window counts on each day; requests and cancelled bookings show no usage; non-overlapping bookings on one day peak, not sum; unlimited add-ons report null; range limit; no cost keys for staff
-- [ ] T027 [US3] Implement daily usage in `backend/app/services/availability.py` and `GET /admin/calendar`
+- [X] T026 [US3] Test-first: `backend/tests/test_admin_calendar.py`. Every day in range appears; two bookings combine; a multi-day window counts on each day; requests and cancelled bookings show no usage; non-overlapping bookings on one day peak, not sum; unlimited add-ons report null; range limit; no cost keys for staff
+- [X] T027 [US3] Implement daily usage in `backend/app/services/availability.py` and `GET /admin/calendar`
 - [ ] T028 [US3] Vitest and implementation: `frontend/src/pages/admin/Calendar.tsx` with month and week views, strings
 
 ---
