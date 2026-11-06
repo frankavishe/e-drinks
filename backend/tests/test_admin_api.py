@@ -395,3 +395,284 @@ async def test_owner_patch_also_returns_financials(client, owner, book):
     booking_id = await _row_id(client, owner, await book())
     res = await client.patch(f"/admin/bookings/{booking_id}", json={"internal_notes": "x"}, headers=owner)
     assert "financials" in res.json()
+
+
+# --- Actions: payments and stages (US2) ---
+
+
+DEPOSIT_BODY = {"phone": "0712345678", "kind": "deposit", "method": "mpesa", "reference": "dep1"}
+
+
+@pytest.fixture
+def opened(client, staff, book):
+    """A booking with a pending deposit for its exact amount; returns (detail, url)."""
+
+    async def _opened(**kwargs):
+        code = await book(**kwargs)
+        booking_id = await _row_id(client, staff, code)
+        url = f"/admin/bookings/{booking_id}"
+        detail = (await client.get(url, headers=staff)).json()
+        res = await client.post(
+            f"/public/bookings/{code}/payments", json={**DEPOSIT_BODY, "amount": detail["deposit_due"]}
+        )
+        assert res.status_code == 201, res.text
+        return (await client.get(url, headers=staff)).json(), url
+
+    return _opened
+
+
+def _refused(res, code: str) -> None:
+    assert res.status_code == 409, res.text
+    assert res.json()["detail"]["code"] == code
+
+
+async def test_deposit_then_confirmed_end_to_end(client, staff, opened):
+    detail, url = await opened()
+    moves = {m["to"]: m for m in detail["allowed_moves"]}
+    assert moves["confirmed"]["allowed"] is False
+    assert moves["confirmed"]["reason"] == "deposit_not_paid"
+
+    _refused(await client.post(f"{url}/stage", json={"to": "confirmed"}, headers=staff), "deposit_not_paid")
+
+    payment_id = detail["payments"][0]["id"]
+    res = await client.post(f"/admin/payments/{payment_id}/confirm", headers=staff)
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data["payments"][0]["status"] == "confirmed"
+    assert data["payments"][0]["confirmed_by_name"] == "Amina"
+    assert data["payments"][0]["confirmed_at"] is not None
+    assert data["amount_paid"] == data["deposit_due"]
+    assert {m["to"]: m for m in data["allowed_moves"]}["confirmed"]["allowed"] is True
+
+    res = await client.post(f"{url}/stage", json={"to": "confirmed", "note": "Paid"}, headers=staff)
+    assert res.status_code == 200, res.text
+    assert res.json()["status"] == "confirmed"
+    last = res.json()["history"][-1]
+    assert (last["to_status"], last["changed_by_name"], last["note"]) == ("confirmed", "Amina", "Paid")
+
+
+async def test_second_confirm_is_a_conflict(client, staff, opened):
+    detail, _ = await opened()
+    confirm = f"/admin/payments/{detail['payments'][0]['id']}/confirm"
+    assert (await client.post(confirm, headers=staff)).status_code == 200
+    _refused(await client.post(confirm, headers=staff), "already_confirmed")
+
+
+async def test_unknown_payment_is_404(client, staff):
+    assert (await client.post("/admin/payments/99999/confirm", headers=staff)).status_code == 404
+    assert (await client.post("/admin/payments/99999/reject", headers=staff)).status_code == 404
+
+
+async def test_reject_payment_and_refusal_when_the_stage_needs_it(client, staff, owner, opened):
+    detail, url = await opened()
+    payment_id = detail["payments"][0]["id"]
+    await client.post(f"/admin/payments/{payment_id}/confirm", headers=staff)
+    await client.post(f"{url}/stage", json={"to": "confirmed"}, headers=staff)
+
+    reject = f"/admin/payments/{payment_id}/reject"
+    _refused(await client.post(reject, headers=staff), "payment_needed_by_stage")
+
+    res = await client.post(f"{url}/stage", json={"to": "request", "note": "Wrong reference"}, headers=owner)
+    assert res.status_code == 200, res.text
+    res = await client.post(reject, headers=staff)
+    assert res.status_code == 200, res.text
+    assert res.json()["payments"][0]["status"] == "rejected"
+    assert res.json()["amount_paid"] == 0
+
+
+async def test_moving_back_is_owner_only_with_a_note(client, staff, owner, book, seeded_session):
+    code = await book()
+    await _set_status(seeded_session, code, "confirmed")
+    url = f"/admin/bookings/{await _row_id(client, staff, code)}"
+
+    _refused(await client.post(f"{url}/stage", json={"to": "request", "note": "x"}, headers=staff), "owner_only")
+    _refused(await client.post(f"{url}/stage", json={"to": "request"}, headers=owner), "note_required")
+
+    staff_moves = (await client.get(url, headers=staff)).json()["allowed_moves"]
+    owner_moves = (await client.get(url, headers=owner)).json()["allowed_moves"]
+    assert {m["to"]: m["reason"] for m in staff_moves}["request"] == "owner_only"
+    assert next(m for m in staff_moves if m["to"] == "request")["back"] is True
+    assert {m["to"]: m["allowed"] for m in owner_moves}["request"] is True
+
+
+async def test_unknown_stage_is_invalid_input(client, staff, book):
+    url = f"/admin/bookings/{await _row_id(client, staff, await book())}"
+    assert (await client.post(f"{url}/stage", json={"to": "nonsense"}, headers=staff)).status_code == 422
+
+
+async def test_stage_cannot_be_used_to_cancel(client, staff, book):
+    url = f"/admin/bookings/{await _row_id(client, staff, await book())}"
+    _refused(await client.post(f"{url}/stage", json={"to": "cancelled"}, headers=staff), "invalid_move")
+
+
+async def test_actions_on_an_unknown_booking_are_404(client, staff):
+    url = "/admin/bookings/99999"
+    responses = [
+        await client.post(f"{url}/stage", json={"to": "quoted"}, headers=staff),
+        await client.get(f"{url}/cancel-preview", headers=staff),
+        await client.post(f"{url}/cancel", json={}, headers=staff),
+        await client.post(f"{url}/date-change", json={"new_date": "2030-01-01"}, headers=staff),
+        await client.post(f"{url}/rush", json={"approve": True}, headers=staff),
+        await client.post(f"{url}/delivery-fee", json={"fee": 1}, headers=staff),
+        await client.post(f"{url}/refunds", json={"amount": 1, "method": "cash"}, headers=staff),
+    ]
+    for res in responses:
+        assert res.status_code == 404, res.request.url
+
+
+# --- Cancel and refund over HTTP ---
+
+
+async def _confirmed_deposit(client, staff, opened, **kwargs):
+    detail, url = await opened(**kwargs)
+    res = await client.post(f"/admin/payments/{detail['payments'][0]['id']}/confirm", headers=staff)
+    assert res.status_code == 200, res.text
+    return res.json(), url
+
+
+async def test_cancel_ten_days_out_shows_half_the_deposit(client, staff, opened):
+    detail, url = await _confirmed_deposit(client, staff, opened, days=10)
+
+    preview = await client.get(f"{url}/cancel-preview", headers=staff)
+    assert preview.status_code == 200, preview.text
+    half = detail["deposit_due"] // 2
+    assert preview.json() == {"days_ahead": 10, "paid": detail["deposit_due"], "refund_due": half}
+
+    res = await client.post(f"{url}/cancel", json={"note": "Changed plans"}, headers=staff)
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert (data["status"], data["refund_due"], data["refunded"]) == ("cancelled", half, 0)
+    assert data["allowed_moves"] == []
+
+
+async def test_cancel_is_refused_with_a_payment_pending(client, staff, opened):
+    _, url = await opened()
+    _refused(await client.post(f"{url}/cancel", json={}, headers=staff), "pending_payments")
+
+
+async def test_cancel_preview_of_a_finished_booking_is_refused(client, staff, opened):
+    _, url = await _confirmed_deposit(client, staff, opened)
+    await client.post(f"{url}/cancel", json={}, headers=staff)
+    _refused(await client.get(f"{url}/cancel-preview", headers=staff), "booking_finished")
+
+
+async def test_refund_records_up_to_what_is_due(client, staff, opened):
+    detail, url = await _confirmed_deposit(client, staff, opened, days=10)
+    half = detail["deposit_due"] // 2
+    await client.post(f"{url}/cancel", json={}, headers=staff)
+    refunds = f"{url}/refunds"
+
+    res = await client.post(refunds, json={"amount": half, "method": "mpesa", "reference": "rf1"}, headers=staff)
+    assert res.status_code == 201, res.text
+    data = res.json()
+    assert data["refunded"] == half
+    refund = data["payments"][-1]
+    assert (refund["kind"], refund["status"], refund["reference"]) == ("refund", "confirmed", "RF1")
+    assert refund["confirmed_by_name"] == "Amina"
+    assert data["amount_paid"] == detail["deposit_due"]  # refunds aren't payments towards the order
+
+    _refused(await client.post(refunds, json={"amount": 1, "method": "cash"}, headers=staff), "refund_exceeds_due")
+
+
+@pytest.mark.parametrize(
+    "bad", [{"amount": 0, "method": "cash"}, {"amount": 1, "method": "cheque"}, {"amount": 1}]
+)
+async def test_refund_input_is_validated(client, staff, opened, bad):
+    _, url = await _confirmed_deposit(client, staff, opened)
+    await client.post(f"{url}/cancel", json={}, headers=staff)
+    assert (await client.post(f"{url}/refunds", json=bad, headers=staff)).status_code == 422
+
+
+# --- Date change, rush and delivery fee over HTTP ---
+
+
+async def test_date_change_then_exception(client, staff, owner, book):
+    url = f"/admin/bookings/{await _row_id(client, staff, await book())}/date-change"
+    first = (today_eat() + timedelta(days=35)).isoformat()
+    second = (today_eat() + timedelta(days=40)).isoformat()
+
+    res = await client.post(url, json={"new_date": first}, headers=staff)
+    assert res.status_code == 200, res.text
+    assert (res.json()["event_date"], res.json()["date_changes_used"]) == (first, 1)
+
+    _refused(await client.post(url, json={"new_date": second}, headers=staff), "date_change_used")
+    exception = {"new_date": second, "exception": True, "note": "Bereavement"}
+    _refused(await client.post(url, json=exception, headers=staff), "owner_only")
+    _refused(await client.post(url, json={**exception, "note": ""}, headers=owner), "note_required")
+
+    res = await client.post(url, json=exception, headers=owner)
+    assert res.status_code == 200, res.text
+    assert res.json()["event_date"] == second
+
+
+async def test_rush_approve_and_decline(client, staff, book):
+    url = f"/admin/bookings/{await _row_id(client, staff, await book(days=1))}/rush"
+    res = await client.post(url, json={"approve": True}, headers=staff)
+    assert res.status_code == 200, res.text
+    assert res.json()["rush_approved"] is True
+
+    other_code = await book(days=2, phone="0755000111")
+    other = f"/admin/bookings/{await _row_id(client, staff, other_code)}/rush"
+    res = await client.post(other, json={"approve": False, "note": "No stock"}, headers=staff)
+    assert res.status_code == 200, res.text
+    assert (res.json()["status"], res.json()["refund_due"]) == ("cancelled", 0)
+
+
+async def test_rush_on_a_normal_booking_is_refused(client, staff, book):
+    url = f"/admin/bookings/{await _row_id(client, staff, await book())}/rush"
+    _refused(await client.post(url, json={"approve": True}, headers=staff), "not_rush")
+
+
+async def test_delivery_fee_updates_the_totals(client, staff, book):
+    code = await book(area_id=None, custom_area="Bagamoyo")
+    url = f"/admin/bookings/{await _row_id(client, staff, code)}"
+    before = (await client.get(url, headers=staff)).json()
+    assert before["provisional"] is True
+    assert {m["to"]: m["reason"] for m in before["allowed_moves"]}["quoted"] == "provisional"
+
+    res = await client.post(f"{url}/delivery-fee", json={"fee": 50_000}, headers=staff)
+
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data["provisional"] is False
+    assert data["delivery_fee"] == 50_000
+    assert data["total"] == before["total"] + 50_000
+    assert data["deposit_due"] == -(-data["total"] // 2)
+    tracked = (await client.post("/public/track", json={"code": code, "phone": "0712345678"})).json()
+    assert (tracked["provisional"], tracked["total"]) == (False, data["total"])
+
+
+async def test_negative_delivery_fee_is_invalid(client, staff, book):
+    code = await book(area_id=None, custom_area="Bagamoyo")
+    url = f"/admin/bookings/{await _row_id(client, staff, code)}/delivery-fee"
+    assert (await client.post(url, json={"fee": -1}, headers=staff)).status_code == 422
+
+
+# --- Role boundary across every action (SC-003) ---
+
+
+async def test_action_responses_keep_cost_and_profit_from_staff(client, staff, owner, opened, book):
+    detail, url = await opened(days=20)
+    payment = f"/admin/payments/{detail['payments'][0]['id']}"
+    rush_code = await book(days=1, phone="0755000111")
+    rush_url = f"/admin/bookings/{await _row_id(client, staff, rush_code)}"
+    fee_code = await book(phone="0755000222", area_id=None, custom_area="Bagamoyo")
+    fee_url = f"/admin/bookings/{await _row_id(client, staff, fee_code)}"
+    new_date = (today_eat() + timedelta(days=45)).isoformat()
+
+    responses = [
+        await client.post(f"{payment}/confirm", headers=staff),
+        await client.post(f"{url}/stage", json={"to": "confirmed"}, headers=staff),
+        await client.post(f"{url}/date-change", json={"new_date": new_date}, headers=staff),
+        await client.get(f"{url}/cancel-preview", headers=staff),
+        await client.post(f"{url}/cancel", json={}, headers=staff),
+        await client.post(f"{url}/refunds", json={"amount": 1, "method": "cash"}, headers=staff),
+        await client.post(f"{rush_url}/rush", json={"approve": True}, headers=staff),
+        await client.post(f"{fee_url}/delivery-fee", json={"fee": 1000}, headers=staff),
+    ]
+    for res in responses:
+        assert res.status_code in (200, 201), res.text
+        assert_staff_safe(res.json())
+
+    res = await client.post(f"{rush_url}/rush", json={"approve": True}, headers=owner)
+    assert "financials" in res.json()

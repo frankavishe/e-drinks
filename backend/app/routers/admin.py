@@ -4,11 +4,12 @@ from datetime import date
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import require_role
 from app.db import get_session
-from app.models import Booking, Profile
+from app.models import Booking, Payment, Profile
 from app.schemas.admin import (
     AdminAddonOut,
     AdminItemOut,
@@ -19,11 +20,19 @@ from app.schemas.admin import (
     BookingPatch,
     BookingResponse,
     BookingRow,
+    CancelIn,
+    CancelPreviewOut,
+    DateChangeIn,
+    DeliveryFeeIn,
     FinancialsOut,
     HistoryOut,
+    MoveOut,
     OverviewOut,
     ProfileOut,
+    RefundIn,
+    RushIn,
     Stage,
+    StageIn,
 )
 from app.services.admin_queries import (
     BookingFilters,
@@ -35,6 +44,19 @@ from app.services.admin_queries import (
     refunded_total,
 )
 from app.services.availability import today_eat
+from app.services.booking_flow import (
+    NewRefund,
+    add_refund,
+    allowed_moves,
+    cancel_booking,
+    cancel_preview,
+    change_date,
+    confirm_payment,
+    decide_rush,
+    move_stage,
+    reject_payment,
+    set_delivery_fee,
+)
 from app.services.bookings import payment_summary
 
 staff_or_owner = require_role("staff", "owner")
@@ -147,6 +169,9 @@ async def _detail(session: AsyncSession, booking: Booking, actor: Profile) -> Bo
             )
             for h in booking.history
         ],
+        "allowed_moves": [
+            MoveOut.model_validate(move) for move in await allowed_moves(session, booking, actor)
+        ],
     }
     if actor.role == "owner":
         return BookingOwnerOut(
@@ -202,3 +227,79 @@ async def patch_booking(booking_id: int, body: BookingPatch, session: Session, a
         booking.internal_notes = body.internal_notes
     await session.commit()
     return await _detail(session, booking, actor)
+
+
+async def _reloaded(session: AsyncSession, booking_id: int, actor: Profile) -> BookingDetailOut:
+    """The detail after an action, read again so new rows and amounts are included."""
+    return await _detail(session, await _found(session, booking_id), actor)
+
+
+@router.post("/bookings/{booking_id}/stage", response_model=BookingResponse)
+async def post_stage(booking_id: int, body: StageIn, session: Session, actor: Actor):
+    booking = await _found(session, booking_id, lock=True)
+    await move_stage(session, booking, body.to, actor, note=body.note)
+    return await _reloaded(session, booking_id, actor)
+
+
+@router.get("/bookings/{booking_id}/cancel-preview", response_model=CancelPreviewOut)
+async def get_cancel_preview(booking_id: int, session: Session):
+    return CancelPreviewOut.model_validate(cancel_preview(await _found(session, booking_id)))
+
+
+@router.post("/bookings/{booking_id}/cancel", response_model=BookingResponse)
+async def post_cancel(booking_id: int, body: CancelIn, session: Session, actor: Actor):
+    booking = await _found(session, booking_id, lock=True)
+    await cancel_booking(session, booking, actor, note=body.note)
+    return await _reloaded(session, booking_id, actor)
+
+
+@router.post("/bookings/{booking_id}/refunds", response_model=BookingResponse, status_code=201)
+async def post_refund(booking_id: int, body: RefundIn, session: Session, actor: Actor):
+    booking = await _found(session, booking_id, lock=True)
+    new = NewRefund(amount=body.amount, method=body.method, reference=body.reference)
+    await add_refund(session, booking, new, actor)
+    return await _reloaded(session, booking_id, actor)
+
+
+@router.post("/bookings/{booking_id}/date-change", response_model=BookingResponse)
+async def post_date_change(booking_id: int, body: DateChangeIn, session: Session, actor: Actor):
+    booking = await _found(session, booking_id, lock=True)
+    await change_date(session, booking, body.new_date, actor, exception=body.exception, note=body.note)
+    return await _reloaded(session, booking_id, actor)
+
+
+@router.post("/bookings/{booking_id}/rush", response_model=BookingResponse)
+async def post_rush(booking_id: int, body: RushIn, session: Session, actor: Actor):
+    booking = await _found(session, booking_id, lock=True)
+    await decide_rush(session, booking, body.approve, actor, note=body.note)
+    return await _reloaded(session, booking_id, actor)
+
+
+@router.post("/bookings/{booking_id}/delivery-fee", response_model=BookingResponse)
+async def post_delivery_fee(booking_id: int, body: DeliveryFeeIn, session: Session, actor: Actor):
+    booking = await _found(session, booking_id, lock=True)
+    await set_delivery_fee(session, booking, body.fee, actor)
+    return await _reloaded(session, booking_id, actor)
+
+
+async def _locked_payment(session: AsyncSession, payment_id: int) -> tuple[Booking, Payment]:
+    """Locks through the booking, so its payment rules and stage can't change underneath."""
+    booking_id = await session.scalar(select(Payment.booking_id).where(Payment.id == payment_id))
+    if booking_id is None:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    booking = await _found(session, booking_id, lock=True)
+    return booking, next(p for p in booking.payments if p.id == payment_id)
+
+
+@router.post("/payments/{payment_id}/confirm", response_model=BookingResponse)
+async def post_confirm_payment(payment_id: int, session: Session, actor: Actor):
+    booking, payment = await _locked_payment(session, payment_id)
+    await confirm_payment(session, booking, payment, actor)
+    return await _reloaded(session, booking.id, actor)
+
+
+@router.post("/payments/{payment_id}/reject", response_model=BookingResponse)
+async def post_reject_payment(payment_id: int, session: Session, actor: Actor):
+    booking, payment = await _locked_payment(session, payment_id)
+    await reject_payment(session, booking, payment, actor)
+    return await _reloaded(session, booking.id, actor)

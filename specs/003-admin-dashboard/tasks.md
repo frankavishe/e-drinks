@@ -57,16 +57,16 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 **Independent Test**: confirm a deposit → can move to Confirmed; try without → refused; cancel 10 days out → refund is 50% of the deposit.
 
-- [ ] T010 [US2] Test-first: `backend/tests/test_refund.py`. `cancellation_refund` at 15, 14, 13, 10, 7, 6, 3 and 0 days; odd amounts round down; `refund_due` with nothing paid, part of the deposit, the exact deposit and full payment
-- [ ] T011 [US2] Implement `cancellation_refund` and `deposit_for` in `backend/app/services/pricing.py`; use `deposit_for` in `build_quote` with no behaviour change
-- [ ] T012 [US2] Test-first: `backend/tests/test_booking_flow.py`. Every allowed move; `invalid_move` for the rest; `deposit_not_paid`, `not_fully_paid`, `rush_not_approved`, `provisional`, `addons_unavailable`; back moves need owner and note; closed and cancelled are final; each change writes a history row with the actor; `allowed_moves` agrees with what enforcing does
-- [ ] T013 [US2] Test-first in `backend/tests/test_booking_flow.py`: confirm records actor and time and updates paid; second confirm `already_confirmed`; reject pending and confirmed; `payment_needed_by_stage`; confirm on a cancelled booking refused
-- [ ] T014 [US2] Test-first in `backend/tests/test_booking_flow.py`: cancel fixes `refund_due`; `pending_payments`; refund records up to `refund_due`, then `refund_exceeds_due`; refund records don't change paid
-- [ ] T015 [US2] Test-first in `backend/tests/test_booking_flow.py`: date change free once at 7+ days; second and under-7 refused; owner exception needs a note, staff can't use it; `date_inside_notice`; add-on clash refused even with an exception, ignoring the booking's own hold; setup, collection and balance date move; prices unchanged
-- [ ] T016 [US2] Test-first in `backend/tests/test_booking_flow.py`: rush approve lets the booking proceed; decline cancels with everything paid due back at any date; `not_rush`; both refused past Quoted. Delivery fee recomputes total and deposit and clears provisional; `not_provisional`; refused past Quoted
-- [ ] T017 [US2] Implement `backend/app/services/booking_flow.py` with `StageRefused(code)`, booking and add-on locks
-- [ ] T018 [US2] Test-first in `backend/tests/test_admin_api.py`: each action endpoint returns the updated detail; refusals are `409` with a code; owner-only rules hold over HTTP; staff responses from every action pass the key walk
-- [ ] T019 [US2] Add the action endpoints to `backend/app/routers/admin.py` and their schemas
+- [X] T010 [US2] Test-first: `backend/tests/test_refund.py`. `cancellation_refund` at 15, 14, 13, 10, 7, 6, 3 and 0 days; odd amounts round down; `refund_due` with nothing paid, part of the deposit, the exact deposit and full payment
+- [X] T011 [US2] Implement `cancellation_refund` and `deposit_for` in `backend/app/services/pricing.py`; use `deposit_for` in `build_quote` with no behaviour change
+- [X] T012 [US2] Test-first: `backend/tests/test_booking_flow.py`. Every allowed move; `invalid_move` for the rest; `deposit_not_paid`, `not_fully_paid`, `rush_not_approved`, `provisional`, `addons_unavailable`; back moves need owner and note; closed and cancelled are final; each change writes a history row with the actor; `allowed_moves` agrees with what enforcing does
+- [X] T013 [US2] Test-first in `backend/tests/test_booking_flow.py`: confirm records actor and time and updates paid; second confirm `already_confirmed`; reject pending and confirmed; `payment_needed_by_stage`; confirm on a cancelled booking refused
+- [X] T014 [US2] Test-first in `backend/tests/test_booking_flow.py`: cancel fixes `refund_due`; `pending_payments`; refund records up to `refund_due`, then `refund_exceeds_due`; refund records don't change paid
+- [X] T015 [US2] Test-first in `backend/tests/test_booking_flow.py`: date change free once at 7+ days; second and under-7 refused; owner exception needs a note, staff can't use it; `date_inside_notice`; add-on clash refused even with an exception, ignoring the booking's own hold; setup, collection and balance date move; prices unchanged
+- [X] T016 [US2] Test-first in `backend/tests/test_booking_flow.py`: rush approve lets the booking proceed; decline cancels with everything paid due back at any date; `not_rush`; both refused past Quoted. Delivery fee recomputes total and deposit and clears provisional; `not_provisional`; refused past Quoted
+- [X] T017 [US2] Implement `backend/app/services/booking_flow.py` with `StageRefused(code)`, booking and add-on locks
+- [X] T018 [US2] Test-first in `backend/tests/test_admin_api.py`: each action endpoint returns the updated detail; refusals are `409` with a code; owner-only rules hold over HTTP; staff responses from every action pass the key walk
+- [X] T019 [US2] Add the action endpoints to `backend/app/routers/admin.py` and their schemas
 
 **Checkpoint**: backend for bookings complete.
 

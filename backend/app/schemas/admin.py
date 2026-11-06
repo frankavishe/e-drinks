@@ -89,6 +89,15 @@ class HistoryOut(BaseModel):
     created_at: datetime
 
 
+class MoveOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    to: str
+    allowed: bool
+    reason: str | None
+    back: bool
+
+
 class BookingDetailOut(BookingRow):
     """What staff see."""
 
@@ -116,6 +125,7 @@ class BookingDetailOut(BookingRow):
     addons: list[AdminAddonOut]
     payments: list[AdminPaymentOut]
     history: list[HistoryOut]
+    allowed_moves: list[MoveOut]
 
 
 class FinancialsOut(BaseModel):
@@ -139,3 +149,44 @@ BookingResponse = BookingOwnerOut | BookingDetailOut
 class BookingPatch(BaseModel):
     efd_receipt_no: Annotated[str, StringConstraints(strip_whitespace=True, max_length=60)] | None = None
     internal_notes: Annotated[str, Field(max_length=5000)] | None = None
+
+
+Note = Annotated[str, StringConstraints(strip_whitespace=True, max_length=1000)]
+
+
+class StageIn(BaseModel):
+    to: Stage
+    note: Note = ""
+
+
+class CancelIn(BaseModel):
+    note: Note = ""
+
+
+class CancelPreviewOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    days_ahead: int
+    paid: int
+    refund_due: int
+
+
+class DateChangeIn(BaseModel):
+    new_date: date
+    exception: bool = False
+    note: Note = ""
+
+
+class RushIn(BaseModel):
+    approve: bool
+    note: Note = ""
+
+
+class DeliveryFeeIn(BaseModel):
+    fee: int = Field(ge=0)
+
+
+class RefundIn(BaseModel):
+    amount: int = Field(ge=1)
+    method: Literal["mpesa", "tigopesa", "airtel", "bank", "cash"]
+    reference: Annotated[str, StringConstraints(strip_whitespace=True, max_length=80)] = ""

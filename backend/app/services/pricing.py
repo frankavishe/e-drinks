@@ -232,6 +232,26 @@ def _delivery_fee(req: QuoteRequest, catalog: Catalog) -> int:
     return catalog.area_fees[req.area_id]
 
 
+def deposit_for(total: int, percent: int) -> int:
+    """Rounded up, so the deposit never falls short of the percentage."""
+    return -(-total * percent // 100)
+
+
+def cancellation_refund(deposit: int, days_ahead: int) -> int:
+    """The part of a paid deposit that comes back: 14+ days 90%, 7-13 days 50%, under 7 nothing."""
+    if days_ahead >= 14:
+        return deposit * 90 // 100
+    if days_ahead >= 7:
+        return deposit // 2
+    return 0
+
+
+def refund_due(paid: int, deposit_due: int, days_ahead: int) -> int:
+    """The policy only penalises the deposit; anything paid above it comes back in full."""
+    deposit_part = min(paid, deposit_due)
+    return cancellation_refund(deposit_part, days_ahead) + paid - deposit_part
+
+
 def build_quote(
     req: QuoteRequest,
     catalog: Catalog,
@@ -258,7 +278,7 @@ def build_quote(
         delivery_custom=delivery_custom,
         empties_deposit=empties_deposit,
         total=total,
-        deposit_due=-(-total * settings.deposit_percent // 100),  # integer ceiling
+        deposit_due=deposit_for(total, settings.deposit_percent),
         balance_due_date=req.event_date - timedelta(days=settings.balance_due_days),
         flags=QuoteFlags(
             is_rush=is_rush,

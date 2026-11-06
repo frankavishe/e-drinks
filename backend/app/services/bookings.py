@@ -205,7 +205,7 @@ async def find_booking(session: AsyncSession, code: str, phone: str) -> Booking 
     )
 
 
-async def _reference_in_use(session: AsyncSession, booking_id: int, reference: str) -> bool:
+async def reference_in_use(session: AsyncSession, booking_id: int, reference: str) -> bool:
     stmt = select(Payment.id).where(
         Payment.booking_id == booking_id,
         Payment.reference == reference,
@@ -219,7 +219,7 @@ async def submit_payment(session: AsyncSession, booking: Booking, new: NewPaymen
     if booking.status in FINISHED_STATUSES:
         raise BookingClosed(booking.code)
     reference = new.reference.strip().upper()
-    if await _reference_in_use(session, booking.id, reference):
+    if await reference_in_use(session, booking.id, reference):
         raise DuplicateReference(reference)
 
     payment = Payment(

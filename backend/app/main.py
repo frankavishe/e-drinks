@@ -1,10 +1,12 @@
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.routers import admin, public
+from app.services.booking_flow import StageRefused
 
 logging.basicConfig(level=logging.INFO)
 
@@ -18,6 +20,12 @@ app.add_middleware(
 )
 app.include_router(public.router)
 app.include_router(admin.router)
+
+
+@app.exception_handler(StageRefused)
+async def stage_refused(_: Request, exc: StageRefused) -> JSONResponse:
+    """A business rule said no: the code is what the UI translates and shows."""
+    return JSONResponse(status_code=409, content={"detail": {"code": exc.code}})
 
 
 @app.get("/health")

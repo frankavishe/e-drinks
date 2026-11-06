@@ -97,7 +97,7 @@ async def test_duplicate_reference_is_409(client, code):
 async def test_double_tap_race_is_409_and_saves_once(client, code, seeded_session, monkeypatch):
     """Simulate both requests passing the read check: the index decides."""
     await client.post(f"/public/bookings/{code}/payments", json=payment_body())
-    monkeypatch.setattr("app.services.bookings._reference_in_use", _never_in_use)
+    monkeypatch.setattr("app.services.bookings.reference_in_use", _never_in_use)
     res = await client.post(f"/public/bookings/{code}/payments", json=payment_body())
     assert res.status_code == 409
     assert res.json()["detail"]["code"] == "duplicate_reference"
