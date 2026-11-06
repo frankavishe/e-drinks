@@ -194,5 +194,43 @@
     "closed": "This booking is closed or cancelled, so it can't take payments.",
     "invalid": "Check the amount and transaction reference.",
     "failed": "Your payment wasn't sent. Check your connection and try again."
+  },
+  "admin": {
+    "logOut": "Log out",
+    "notAllowed": "This account isn't allowed in the admin area.",
+    "loadFailed": "We couldn't load this. Check your connection and try again.",
+    "nav": {
+      "dashboard": "Overview",
+      "bookings": "Bookings"
+    },
+    "role": {
+      "staff": "Staff",
+      "owner": "Owner"
+    },
+    "flag": {
+      "rush": "Rush",
+      "rushApproved": "Rush approved",
+      "provisional": "Delivery fee not set"
+    },
+    "dashboard": {
+      "today": "Today",
+      "upcoming": "Next 14 days",
+      "noneToday": "No events today.",
+      "noneUpcoming": "No events in the next 14 days."
+    },
+    "list": {
+      "search": "Search by number, name or phone",
+      "searchButton": "Search",
+      "stage": "Stage",
+      "allStages": "All stages",
+      "from": "From date",
+      "to": "To date",
+      "rushOnly": "Rush only",
+      "count_one": "{{count}} booking",
+      "count_other": "{{count}} bookings",
+      "empty": "No bookings match.",
+      "previous": "Previous",
+      "next": "Next"
+    }
   }
 }

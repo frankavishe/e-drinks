@@ -74,11 +74,11 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 ## Phase 5: Admin screens for US1 and US2
 
-- [ ] T020 Add types and calls to `frontend/src/lib/adminApi.ts`
-- [ ] T021 Vitest in `frontend/src/pages/admin/AdminLayout.test.tsx`: no session goes to `/login`; `403` shows not-allowed; staff don't see owner-only links
-- [ ] T022 [P] [US1] Vitest in `frontend/src/pages/admin/BookingList.test.tsx`: filters and search reach the API; rows show stage and rush
+- [X] T020 Add types and calls to `frontend/src/lib/adminApi.ts`
+- [X] T021 Vitest in `frontend/src/pages/admin/AdminLayout.test.tsx`: no session goes to `/login`; `403` shows not-allowed; log out forgets cached admin data. No link is owner-only: staff can read catalog, zones and settings (T033 tests read-only)
+- [X] T022 [P] [US1] Vitest in `frontend/src/pages/admin/BookingList.test.tsx`: filters and search reach the API; rows show stage and rush
 - [ ] T023 [US2] Vitest in `frontend/src/pages/admin/BookingDetail.test.tsx`: refused moves show the server's reason in the current language; confirm calls the API; cancel shows the preview first; financials only when the response has them
-- [ ] T024 [US1] Implement `AdminLayout`, `Dashboard`, `BookingList` in `frontend/src/pages/admin/`, the `/admin` routes in `frontend/src/App.tsx`, and strings in `frontend/src/i18n/sw.json` and `en.json`
+- [X] T024 [US1] Implement `AdminLayout`, `Dashboard`, `BookingList` in `frontend/src/pages/admin/`, the `/admin` routes in `frontend/src/App.tsx`, and strings in `frontend/src/i18n/sw.json` and `en.json`
 - [ ] T025 [US2] Implement `frontend/src/pages/admin/BookingDetail.tsx`: payments, history, stage buttons, cancel and refund, date change, rush, delivery fee, EFD number and notes, with strings for every refusal code
 
 **Checkpoint**: staff can run a booking end to end in the browser.

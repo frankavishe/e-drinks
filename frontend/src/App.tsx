@@ -1,6 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
+import AdminLayout from './pages/admin/AdminLayout'
+import BookingList from './pages/admin/BookingList'
+import Dashboard from './pages/admin/Dashboard'
 import BookingWizard from './pages/book/BookingWizard'
 import ComingSoon from './pages/ComingSoon'
 import Home from './pages/Home'
@@ -19,6 +22,11 @@ export default function App() {
             <Route path="login" element={<Login />} />
             <Route path="book" element={<BookingWizard />} />
             <Route path="track" element={<Track />} />
+            <Route path="*" element={<ComingSoon />} />
+          </Route>
+          <Route path="admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="bookings" element={<BookingList />} />
             <Route path="*" element={<ComingSoon />} />
           </Route>
         </Routes>

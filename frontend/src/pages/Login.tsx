@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -6,6 +7,7 @@ import { supabase } from '../lib/supabase'
 export default function Login() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -18,8 +20,10 @@ export default function Login() {
     setError('')
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     setBusy(false)
-    if (error) setError(t('login.error'))
-    else navigate('/admin')
+    if (error) return setError(t('login.error'))
+    // A new person may be logging in on this device: nothing cached for the last one may show.
+    queryClient.removeQueries({ queryKey: ['admin'] })
+    navigate('/admin')
   }
 
   return (

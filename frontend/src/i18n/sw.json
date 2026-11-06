@@ -194,5 +194,43 @@
     "closed": "Oda hii imefungwa au imeghairiwa, kwa hiyo haipokei malipo.",
     "invalid": "Hakikisha kiasi na namba ya muamala.",
     "failed": "Malipo hayajatumwa. Angalia mtandao wako kisha ujaribu tena."
+  },
+  "admin": {
+    "logOut": "Toka",
+    "notAllowed": "Akaunti hii hairuhusiwi kuingia eneo la utawala.",
+    "loadFailed": "Imeshindikana kupakia. Angalia mtandao wako kisha ujaribu tena.",
+    "nav": {
+      "dashboard": "Muhtasari",
+      "bookings": "Oda"
+    },
+    "role": {
+      "staff": "Mfanyakazi",
+      "owner": "Mmiliki"
+    },
+    "flag": {
+      "rush": "Ya haraka",
+      "rushApproved": "Ya haraka, imekubaliwa",
+      "provisional": "Bei ya usafirishaji haijawekwa"
+    },
+    "dashboard": {
+      "today": "Leo",
+      "upcoming": "Siku 14 zijazo",
+      "noneToday": "Hakuna matukio leo.",
+      "noneUpcoming": "Hakuna matukio katika siku 14 zijazo."
+    },
+    "list": {
+      "search": "Tafuta kwa namba, jina au simu",
+      "searchButton": "Tafuta",
+      "stage": "Hatua",
+      "allStages": "Hatua zote",
+      "from": "Kuanzia tarehe",
+      "to": "Hadi tarehe",
+      "rushOnly": "Za haraka tu",
+      "count_one": "Oda {{count}}",
+      "count_other": "Oda {{count}}",
+      "empty": "Hakuna oda zinazolingana.",
+      "previous": "Iliyotangulia",
+      "next": "Inayofuata"
+    }
   }
 }
