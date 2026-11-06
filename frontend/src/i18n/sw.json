@@ -203,7 +203,18 @@
     "loadFailed": "Imeshindikana kupakia. Angalia mtandao wako kisha ujaribu tena.",
     "nav": {
       "dashboard": "Muhtasari",
-      "bookings": "Oda"
+      "bookings": "Oda",
+      "calendar": "Kalenda"
+    },
+    "calendar": {
+      "month": "Mwezi",
+      "week": "Wiki",
+      "previous": "Iliyopita",
+      "today": "Leo",
+      "next": "Inayofuata",
+      "usage": "{{committed}} kati ya {{owned}}",
+      "inUse": "{{committed}} zinatumika",
+      "full": "Imejaa"
     },
     "role": {
       "staff": "Mfanyakazi",

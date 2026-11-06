@@ -78,6 +78,7 @@ describe('AdminLayout', () => {
     expect(await screen.findByText('admin content')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: t('admin.nav.dashboard') })).toHaveAttribute('href', '/admin')
     expect(screen.getByRole('link', { name: t('admin.nav.bookings') })).toHaveAttribute('href', '/admin/bookings')
+    expect(screen.getByRole('link', { name: t('admin.nav.calendar') })).toHaveAttribute('href', '/admin/calendar')
     expect(screen.getByText(`Amina · ${t('admin.role.staff')}`)).toBeInTheDocument()
   })
 

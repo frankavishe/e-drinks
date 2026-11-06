@@ -131,6 +131,34 @@ export interface RefundInput {
   reference: string
 }
 
+export interface CalendarBooking {
+  id: number
+  code: string
+  status: string
+  is_rush: boolean
+  customer_name: string
+  start_time: string
+}
+
+export interface CalendarAddon {
+  addon_id: number
+  name_sw: string
+  name_en: string
+  committed: number
+  /** Null when the add-on has no limit. */
+  owned: number | null
+}
+
+export interface CalendarDay {
+  date: string
+  bookings: CalendarBooking[]
+  addons: CalendarAddon[]
+}
+
+export interface Calendar {
+  days: CalendarDay[]
+}
+
 const send = (method: string, body?: unknown): RequestInit => ({
   method,
   body: body === undefined ? undefined : JSON.stringify(body),
@@ -171,6 +199,9 @@ export const confirmPayment = (paymentId: number) =>
   api<BookingDetail>(`/admin/payments/${paymentId}/confirm`, send('POST'))
 export const rejectPayment = (paymentId: number) =>
   api<BookingDetail>(`/admin/payments/${paymentId}/reject`, send('POST'))
+
+export const getCalendar = (from: string, to: string) =>
+  api<Calendar>(`/admin/calendar?${new URLSearchParams({ from, to })}`)
 
 /** Date and time as they read in Dar es Salaam, wherever the browser is. */
 export function formatDateTime(iso: string, lang: string): string {

@@ -9,6 +9,7 @@ import { Notice } from '../book/ui'
 const NAV = [
   ['/admin', 'admin.nav.dashboard', true],
   ['/admin/bookings', 'admin.nav.bookings', false],
+  ['/admin/calendar', 'admin.nav.calendar', false],
 ] as const
 
 export default function AdminLayout() {

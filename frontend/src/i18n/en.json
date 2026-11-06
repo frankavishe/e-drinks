@@ -203,7 +203,18 @@
     "loadFailed": "We couldn't load this. Check your connection and try again.",
     "nav": {
       "dashboard": "Overview",
-      "bookings": "Bookings"
+      "bookings": "Bookings",
+      "calendar": "Calendar"
+    },
+    "calendar": {
+      "month": "Month",
+      "week": "Week",
+      "previous": "Previous",
+      "today": "Today",
+      "next": "Next",
+      "usage": "{{committed}} of {{owned}}",
+      "inUse": "{{committed}} in use",
+      "full": "Full"
     },
     "role": {
       "staff": "Staff",
