@@ -103,10 +103,10 @@ each test task, run it and see it fail, then implement. Frontend logic has Vites
 
 **Independent Test**: change a tier price → the next quote uses it; existing bookings keep their old price.
 
-- [ ] T029 [US4] Test-first: `backend/tests/test_catalog_admin.py`. Tier validation; `in_use` on each delete rule in `data-model.md`; deleting unused records works; setting validation
-- [ ] T030 [US4] Implement `backend/app/services/catalog_admin.py`
-- [ ] T031 [US4] Test-first in `backend/tests/test_catalog_admin.py`: price change reaches a new quote and leaves a booking unchanged; deactivated product leaves `/public/catalog`, `/public/packages` rules and quotes; staff get `403` on all writes, read without `cost_price` or `replacement_cost`, and can read settings
-- [ ] T032 [US4] Add catalog, zone, area, venue and settings endpoints and schemas; filter inactive products' rules in `backend/app/routers/public.py`
+- [X] T029 [US4] Test-first: `backend/tests/test_catalog_admin.py`. Tier validation; `in_use` on each delete rule in `data-model.md`; deleting unused records works; setting validation
+- [X] T030 [US4] Implement `backend/app/services/catalog_admin.py`
+- [X] T031 [US4] Test-first in `backend/tests/test_catalog_admin.py`: price change reaches a new quote and leaves a booking unchanged; deactivated product leaves `/public/catalog`, `/public/packages` rules and quotes; staff get `403` on all writes, read without `cost_price` or `replacement_cost`, and can read settings
+- [X] T032 [US4] Add catalog, zone, area, venue and settings endpoints and schemas; filter inactive products' rules in `backend/app/routers/public.py`
 - [ ] T033 [US4] Vitest in `frontend/src/pages/admin/Settings.test.tsx` and `Catalog.test.tsx`: read-only for staff; no cost column for staff; refusal shown on repeated tier
 - [ ] T034 [US4] Implement `Catalog`, `ZonesVenues`, `Settings` in `frontend/src/pages/admin/`, strings
 

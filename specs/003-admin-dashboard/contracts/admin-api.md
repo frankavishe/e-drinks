@@ -85,11 +85,13 @@ Every day in the range appears. `bookings` leaves out cancelled bookings. `addon
 
 `GET /admin/products` → staff: all public product fields plus `active` and `tiers`. Owner: also `cost_price`.
 
-`POST /admin/products`, `PATCH /admin/products/{id}`, `DELETE /admin/products/{id}` (`204`).
+`POST /admin/products` (body includes `tiers`, so a product can't exist without a price), `PATCH /admin/products/{id}`, `DELETE /admin/products/{id}` (`204`).
+
+In a `PATCH`, null means "not sent", except on `image_url` and `owned_capacity`, where it clears the value.
 
 `PUT /admin/products/{id}/tiers` body `[{"min_qty": 1, "unit_price": 30000}]`.
 
-`GET /admin/packages` (with rules), `POST`, `PATCH /{id}`, `DELETE /{id}`, `PUT /admin/packages/{id}/rules` body `[{"product_id": 1, "qty_per_guest": "0.500", "per_hour": true}]`.
+`GET /admin/packages` (with rules), `POST` (body includes `rules`), `PATCH /{id}`, `DELETE /{id}`, `PUT /admin/packages/{id}/rules` body `[{"product_id": 1, "qty_per_guest": "0.500", "per_hour": true}]`.
 
 `GET /admin/addons` → staff: no `replacement_cost`; owner: with it. `POST`, `PATCH /{id}`, `DELETE /{id}`.
 
@@ -97,7 +99,7 @@ Every day in the range appears. `bookings` leaves out cancelled bookings. `addon
 
 `POST /admin/areas`, `PATCH /admin/areas/{id}`, `DELETE /admin/areas/{id}`.
 
-`GET /admin/venues`, `POST`, `PATCH /{id}`, `DELETE /{id}`.
+`GET /admin/venues`, `POST`, `PATCH /{id}`, `DELETE /{id}`. Latitude and longitude are left out: nothing reads them yet.
 
 ## Settings
 

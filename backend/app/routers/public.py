@@ -76,7 +76,14 @@ async def packages(session: Session):
         .options(selectinload(Package.rules))
         .order_by(Package.sort_order, Package.id)
     )
-    return (await session.scalars(stmt)).all()
+    active = set(await session.scalars(select(Product.id).where(Product.active)))
+    # A new response, not an edit to package.rules: that relationship would delete what it no longer holds.
+    return [
+        PackageOut.model_validate(package).model_copy(
+            update={"rules": [r for r in package.rules if r.product_id in active]}
+        )
+        for package in await session.scalars(stmt)
+    ]
 
 
 @router.get("/addons", response_model=list[AddonOut])

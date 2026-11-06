@@ -70,8 +70,10 @@ backend/
 │   ├── main.py                    # mount the admin router
 │   ├── models/booking.py          # two new columns
 │   ├── routers/admin.py           # NEW
+│   ├── routers/admin_catalog.py   # NEW: catalog, zones, venues, settings; included into admin
 │   ├── routers/public.py          # /packages leaves out inactive products' rules
 │   ├── schemas/admin.py           # NEW: staff and owner shapes
+│   ├── schemas/admin_catalog.py   # NEW: staff and owner shapes for the catalog
 │   ├── seed.py                    # --staff-email
 │   └── services/
 │       ├── pricing.py             # cancellation_refund, deposit_for

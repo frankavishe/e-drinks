@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth import require_role
 from app.db import get_session
 from app.models import Booking, Payment, Profile
+from app.routers.admin_catalog import router as catalog_router
 from app.schemas.admin import (
     AdminAddonOut,
     AdminItemOut,
@@ -70,6 +71,7 @@ MAX_CALENDAR_DAYS = 62
 staff_or_owner = require_role("staff", "owner")
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(staff_or_owner)])
+router.include_router(catalog_router)
 
 Session = Annotated[AsyncSession, Depends(get_session)]
 Actor = Annotated[Profile, Depends(staff_or_owner)]

@@ -90,10 +90,12 @@ can't be deleted, only deactivated.
 | Entity | Rule | Code |
 |---|---|---|
 | PriceTier set | at least one; lowest `min_qty` is 1; no repeated `min_qty`; `unit_price` ≥ 0 | `invalid_tiers` |
-| Product | not deleted while in `booking_items` or `package_rules` | `in_use` |
+| PackageRule set | at least one; no repeated product; every product exists | `invalid_rules` |
+| Product | not deleted while in `booking_items`, `package_rules`, `stock_movements` or `purchase_needs`, or with stock on hand or reserved; an empty `stock_levels` row goes with it | `in_use` |
 | Package | not deleted while on a booking | `in_use` |
+| Package slug, Area name | unique | `already_exists` |
 | Addon | not deleted while in `booking_addons` | `in_use` |
 | Zone | not deleted while it has areas | `in_use` |
 | Area | not deleted while it has venues or bookings | `in_use` |
 | Venue | not deleted while on a booking | `in_use` |
-| Setting | only known seed keys; pricing keys must be whole numbers ≥ 0, `deposit_percent` at most 100 | `invalid_setting` |
+| Setting | only known seed keys; pricing keys must be whole numbers ≥ 0 of at most 12 digits, `deposit_percent` at most 100, day counts at most 365 | `invalid_setting` |
