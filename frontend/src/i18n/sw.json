@@ -61,13 +61,15 @@
     "noDetails": "Tutakutumia namba za malipo kupitia WhatsApp.",
     "kind": {
       "deposit": "Amana",
-      "balance": "Salio"
+      "balance": "Salio",
+      "refund": "Marejesho ya fedha"
     },
     "method": {
       "mpesa": "M-Pesa",
       "tigopesa": "Tigo Pesa",
       "airtel": "Airtel Money",
-      "bank": "Benki"
+      "bank": "Benki",
+      "cash": "Taslimu"
     },
     "paymentStatus": {
       "pending": "Inasubiri uthibitisho",
@@ -231,6 +233,113 @@
       "empty": "Hakuna oda zinazolingana.",
       "previous": "Iliyotangulia",
       "next": "Inayofuata"
+    },
+    "keep": "Rudi",
+    "refundDue": "Marejesho yanayodaiwa",
+    "refunded": "Yaliyorejeshwa hadi sasa",
+    "detail": {
+      "allBookings": "Oda zote",
+      "notFound": "Hatukupata oda hii.",
+      "event": "Tukio",
+      "setup": "Maandalizi",
+      "collect": "Kukusanya vifaa",
+      "customer": "Mteja",
+      "customerNotes": "Maelezo ya mteja",
+      "order": "Oda",
+      "deposit": "Amana",
+      "history": "Historia",
+      "byCustomer": "Mteja"
+    },
+    "financials": {
+      "title": "Takwimu za mmiliki",
+      "goods": "Gharama ya vinywaji",
+      "revenue": "Mapato",
+      "profit": "Faida"
+    },
+    "stage": {
+      "title": "Hatua",
+      "moveTo": "Hamishia: {{stage}}",
+      "moveBack": "Rudisha kwenye: {{stage}}",
+      "backNote": "Kwa nini inarudishwa?",
+      "backConfirm": "Rudisha nyuma"
+    },
+    "payments": {
+      "title": "Malipo",
+      "none": "Bado hakuna malipo.",
+      "confirm": "Thibitisha malipo",
+      "reject": "Kataa malipo",
+      "rejectSure": "Kataa malipo haya? Hili haliwezi kutenguliwa.",
+      "rejectYes": "Ndiyo, yakatae"
+    },
+    "cancel": {
+      "title": "Ghairi oda",
+      "open": "Angalia kiasi kinachorejeshwa",
+      "daysAhead": "Siku kabla ya tukio",
+      "note": "Sababu ya kughairi (si lazima)",
+      "confirm": "Ndiyo, ghairi oda hii",
+      "keep": "Usighairi"
+    },
+    "refund": {
+      "title": "Rekodi marejesho",
+      "amount": "Kiasi kilichorejeshwa (TSh)",
+      "method": "Njia ya kurejesha",
+      "reference": "Namba ya muamala wa marejesho (si lazima)",
+      "submit": "Rekodi marejesho"
+    },
+    "date": {
+      "title": "Badili tarehe",
+      "used_one": "Mabadiliko ya tarehe yaliyotumika: {{count}}",
+      "used_other": "Mabadiliko ya tarehe yaliyotumika: {{count}}",
+      "newDate": "Tarehe mpya",
+      "note": "Maelezo ya tarehe (yanahitajika kwa ruhusa maalum)",
+      "exception": "Ruhusa maalum ya mmiliki: ruhusu nje ya sera ya kubadili tarehe",
+      "submit": "Badili tarehe"
+    },
+    "rush": {
+      "title": "Ombi la haraka",
+      "note": "Maelezo ya uamuzi (si lazima)",
+      "approve": "Kubali ombi la haraka",
+      "decline": "Kataa ombi la haraka",
+      "declineSure": "Kukataa kunaghairi oda hii, na kila kilicholipwa kinarejeshwa: {{amount}}.",
+      "declineYes": "Ndiyo, kataa na ughairi"
+    },
+    "fee": {
+      "title": "Bei ya usafirishaji",
+      "label": "Bei ya usafirishaji (TSh)",
+      "submit": "Weka bei ya usafirishaji"
+    },
+    "records": {
+      "title": "Kumbukumbu",
+      "efd": "Namba ya risiti ya EFD",
+      "internal": "Maelezo ya ndani",
+      "internalHint": "Kwa wafanyakazi tu. Wateja hawayaoni.",
+      "save": "Hifadhi kumbukumbu",
+      "saved": "Imehifadhiwa."
+    },
+    "refusal": {
+      "unknown": "Haikufanikiwa. Hakikisha ulichoandika kisha ujaribu tena.",
+      "invalid_move": "Oda katika hatua hii haiwezi kufanya hivyo.",
+      "deposit_not_paid": "Amana bado haijathibitishwa.",
+      "not_fully_paid": "Kiasi chote bado hakijathibitishwa.",
+      "rush_not_approved": "Ombi la haraka bado halijakubaliwa.",
+      "provisional": "Weka bei ya usafirishaji kwanza.",
+      "addons_unavailable": "Huduma za ziada za oda hii hazipatikani kwa idadi hiyo katika muda huo.",
+      "owner_only": "Mmiliki pekee ndiye anaweza kufanya hivi.",
+      "note_required": "Andika maelezo kwanza.",
+      "booking_finished": "Oda hii imefungwa au imeghairiwa, kwa hiyo haiwezi kubadilishwa.",
+      "pending_payments": "Kuna malipo yanayosubiri. Yathibitishe au uyakatae kwanza.",
+      "not_cancelled": "Marejesho yanarekodiwa kwenye oda iliyoghairiwa tu.",
+      "refund_exceeds_due": "Kiasi hicho ni zaidi ya marejesho yanayodaiwa.",
+      "duplicate_reference": "Namba hii ya muamala tayari imetumika kwenye oda hii.",
+      "date_change_used": "Badiliko la bure la tarehe tayari limetumika.",
+      "too_close_to_event": "Tukio limebaki chini ya siku 7, kwa hiyo tarehe haiwezi kubadilishwa bure.",
+      "date_inside_notice": "Tarehe hiyo imepita au iko karibu mno kwa muda tunaohitaji.",
+      "same_date": "Hiyo tayari ndiyo tarehe ya tukio.",
+      "not_rush": "Hii si oda ya haraka.",
+      "not_provisional": "Bei ya usafirishaji tayari imewekwa.",
+      "already_confirmed": "Malipo haya tayari yamethibitishwa.",
+      "already_rejected": "Malipo haya tayari yamekataliwa.",
+      "payment_needed_by_stage": "Hatua ya oda inategemea malipo haya. Mmiliki lazima airudishe nyuma kwanza."
     }
   }
 }

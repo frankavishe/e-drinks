@@ -61,13 +61,15 @@
     "noDetails": "We'll send you the payment numbers on WhatsApp.",
     "kind": {
       "deposit": "Deposit",
-      "balance": "Balance"
+      "balance": "Balance",
+      "refund": "Refund"
     },
     "method": {
       "mpesa": "M-Pesa",
       "tigopesa": "Tigo Pesa",
       "airtel": "Airtel Money",
-      "bank": "Bank"
+      "bank": "Bank",
+      "cash": "Cash"
     },
     "paymentStatus": {
       "pending": "Waiting for confirmation",
@@ -231,6 +233,113 @@
       "empty": "No bookings match.",
       "previous": "Previous",
       "next": "Next"
+    },
+    "keep": "Go back",
+    "refundDue": "Refund due",
+    "refunded": "Refunded so far",
+    "detail": {
+      "allBookings": "All bookings",
+      "notFound": "We couldn't find this booking.",
+      "event": "Event",
+      "setup": "Setup",
+      "collect": "Collection",
+      "customer": "Customer",
+      "customerNotes": "Customer's notes",
+      "order": "Order",
+      "deposit": "Deposit",
+      "history": "History",
+      "byCustomer": "Customer"
+    },
+    "financials": {
+      "title": "Owner's figures",
+      "goods": "Cost of drinks",
+      "revenue": "Revenue",
+      "profit": "Profit"
+    },
+    "stage": {
+      "title": "Stage",
+      "moveTo": "Move to: {{stage}}",
+      "moveBack": "Move back to: {{stage}}",
+      "backNote": "Why is it moving back?",
+      "backConfirm": "Move back"
+    },
+    "payments": {
+      "title": "Payments",
+      "none": "No payments yet.",
+      "confirm": "Confirm payment",
+      "reject": "Reject payment",
+      "rejectSure": "Reject this payment? This can't be undone.",
+      "rejectYes": "Yes, reject it"
+    },
+    "cancel": {
+      "title": "Cancel booking",
+      "open": "See what's refunded",
+      "daysAhead": "Days before the event",
+      "note": "Reason for cancelling (optional)",
+      "confirm": "Yes, cancel this booking",
+      "keep": "Keep the booking"
+    },
+    "refund": {
+      "title": "Record a refund",
+      "amount": "Amount refunded (TSh)",
+      "method": "Refund method",
+      "reference": "Refund reference (optional)",
+      "submit": "Record refund"
+    },
+    "date": {
+      "title": "Change the date",
+      "used_one": "Date changes used: {{count}}",
+      "used_other": "Date changes used: {{count}}",
+      "newDate": "New date",
+      "note": "Note about the date (needed for an exception)",
+      "exception": "Owner exception: allow it outside the date-change policy",
+      "submit": "Change date"
+    },
+    "rush": {
+      "title": "Rush request",
+      "note": "Note about the decision (optional)",
+      "approve": "Approve rush",
+      "decline": "Decline rush",
+      "declineSure": "Declining cancels this booking, and everything paid is due back: {{amount}}.",
+      "declineYes": "Yes, decline and cancel"
+    },
+    "fee": {
+      "title": "Delivery fee",
+      "label": "Delivery fee (TSh)",
+      "submit": "Set delivery fee"
+    },
+    "records": {
+      "title": "Records",
+      "efd": "EFD receipt number",
+      "internal": "Internal notes",
+      "internalHint": "Staff only. Customers never see these.",
+      "save": "Save records",
+      "saved": "Saved."
+    },
+    "refusal": {
+      "unknown": "That didn't go through. Check what you entered and try again.",
+      "invalid_move": "A booking at this stage can't do that.",
+      "deposit_not_paid": "The deposit hasn't been confirmed yet.",
+      "not_fully_paid": "The full amount hasn't been confirmed yet.",
+      "rush_not_approved": "The rush request hasn't been approved yet.",
+      "provisional": "Set the delivery fee first.",
+      "addons_unavailable": "The extras on this booking aren't available in that number for those times.",
+      "owner_only": "Only the owner can do this.",
+      "note_required": "Add a note first.",
+      "booking_finished": "This booking is closed or cancelled, so it can't be changed.",
+      "pending_payments": "A payment is still waiting. Confirm or reject it first.",
+      "not_cancelled": "Refunds can only be recorded on a cancelled booking.",
+      "refund_exceeds_due": "That's more than the refund still due.",
+      "duplicate_reference": "This reference has already been used on this booking.",
+      "date_change_used": "The free date change has already been used.",
+      "too_close_to_event": "The event is under 7 days away, so the date can't be changed for free.",
+      "date_inside_notice": "That date is in the past or too soon for the notice we need.",
+      "same_date": "That's already the event date.",
+      "not_rush": "This isn't a rush booking.",
+      "not_provisional": "The delivery fee has already been set.",
+      "already_confirmed": "This payment has already been confirmed.",
+      "already_rejected": "This payment has already been rejected.",
+      "payment_needed_by_stage": "The booking's stage depends on this payment. The owner must move it back first."
     }
   }
 }
