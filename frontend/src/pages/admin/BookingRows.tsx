@@ -4,12 +4,19 @@ import { ApiError } from '../../lib/api'
 import type { BookingRow } from '../../lib/adminApi'
 import { formatDate, formatTzs } from '../../lib/publicApi'
 import { Notice } from '../book/ui'
+import { refusalKeys } from './useBookingAction'
 
 /** A failed load: an expired login goes back to the login page, anything else is said out loud. */
 export function LoadProblem({ error }: { error: unknown }) {
   const { t } = useTranslation()
   if (error instanceof ApiError && error.status === 401) return <Navigate to="/login" replace />
   return <Notice tone="problem">{t('admin.loadFailed')}</Notice>
+}
+
+/** Why the server said no, in the current language. Nothing when there's no error. */
+export function Refusal({ error }: { error: unknown }) {
+  const { t } = useTranslation()
+  return error ? <Notice tone="problem">{t(refusalKeys(error))}</Notice> : null
 }
 
 export function Flag({ tone = 'warn', children }: { tone?: 'warn' | 'plain'; children: string }) {

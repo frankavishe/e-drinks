@@ -79,6 +79,8 @@ describe('AdminLayout', () => {
     expect(screen.getByRole('link', { name: t('admin.nav.dashboard') })).toHaveAttribute('href', '/admin')
     expect(screen.getByRole('link', { name: t('admin.nav.bookings') })).toHaveAttribute('href', '/admin/bookings')
     expect(screen.getByRole('link', { name: t('admin.nav.calendar') })).toHaveAttribute('href', '/admin/calendar')
+    expect(screen.getByRole('link', { name: t('admin.nav.zones') })).toHaveAttribute('href', '/admin/zones')
+    expect(screen.getByRole('link', { name: t('admin.nav.settings') })).toHaveAttribute('href', '/admin/settings')
     expect(screen.getByText(`Amina · ${t('admin.role.staff')}`)).toBeInTheDocument()
   })
 

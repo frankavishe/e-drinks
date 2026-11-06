@@ -204,7 +204,9 @@
     "nav": {
       "dashboard": "Muhtasari",
       "bookings": "Oda",
-      "calendar": "Kalenda"
+      "calendar": "Kalenda",
+      "zones": "Kanda na kumbi",
+      "settings": "Mipangilio"
     },
     "calendar": {
       "month": "Mwezi",
@@ -327,6 +329,63 @@
       "save": "Hifadhi kumbukumbu",
       "saved": "Imehifadhiwa."
     },
+    "manage": {
+      "edit": "Hariri",
+      "delete": "Futa",
+      "deleteSure": "Futa {{name}}? Hili haliwezi kutenguliwa.",
+      "deleteYes": "Ndiyo, futa",
+      "save": "Hifadhi"
+    },
+    "zones": {
+      "zonesTitle": "Kanda za usafirishaji",
+      "noZones": "Bado hakuna kanda.",
+      "addZone": "Ongeza kanda",
+      "zoneName": "Jina la kanda",
+      "fee": "Bei ya usafirishaji (TSh)",
+      "areas": "Maeneo",
+      "noAreas": "Bado hakuna maeneo katika kanda hii.",
+      "addArea": "Ongeza eneo",
+      "areaName": "Jina la eneo",
+      "zone": "Kanda",
+      "venuesTitle": "Kumbi zilizohifadhiwa",
+      "noVenues": "Bado hakuna kumbi zilizohifadhiwa.",
+      "addVenue": "Ongeza ukumbi",
+      "venueName": "Jina la ukumbi",
+      "area": "Eneo",
+      "chooseArea": "Chagua eneo",
+      "address": "Anwani (si lazima)"
+    },
+    "settings": {
+      "readOnly": "Mmiliki pekee ndiye anaweza kubadilisha haya.",
+      "save": "Hifadhi mipangilio",
+      "saved": "Imehifadhiwa.",
+      "group": {
+        "business": "Taarifa za biashara",
+        "rules": "Kanuni za oda",
+        "payment": "Taarifa za malipo",
+        "policy": "Masharti ya oda"
+      },
+      "field": {
+        "business_name": "Jina la biashara",
+        "tin": "TIN",
+        "vrn": "VRN",
+        "phone": "Namba ya simu",
+        "email": "Barua pepe",
+        "notification_email": "Barua pepe ya taarifa za oda mpya",
+        "whatsapp_number": "Namba ya WhatsApp",
+        "min_order": "Oda ya chini (TSh)",
+        "notice_days": "Muda wa taarifa (siku)",
+        "notice_days_servers": "Muda wa taarifa ukiwa na wahudumu (siku)",
+        "deposit_percent": "Amana (%)",
+        "balance_due_days": "Salio linalipwa kabla ya tukio (siku)",
+        "mpesa_till": "Namba ya M-Pesa till",
+        "tigopesa_lipa": "Namba ya Lipa ya Tigo Pesa",
+        "airtel_lipa": "Namba ya Lipa ya Airtel Money",
+        "bank_details": "Taarifa za benki",
+        "policy_text_sw": "Masharti ya oda kwa Kiswahili",
+        "policy_text_en": "Masharti ya oda kwa Kiingereza"
+      }
+    },
     "refusal": {
       "unknown": "Haikufanikiwa. Hakikisha ulichoandika kisha ujaribu tena.",
       "invalid_move": "Oda katika hatua hii haiwezi kufanya hivyo.",
@@ -350,7 +409,12 @@
       "not_provisional": "Bei ya usafirishaji tayari imewekwa.",
       "already_confirmed": "Malipo haya tayari yamethibitishwa.",
       "already_rejected": "Malipo haya tayari yamekataliwa.",
-      "payment_needed_by_stage": "Hatua ya oda inategemea malipo haya. Mmiliki lazima airudishe nyuma kwanza."
+      "payment_needed_by_stage": "Hatua ya oda inategemea malipo haya. Mmiliki lazima airudishe nyuma kwanza.",
+      "invalid_tiers": "Angalia viwango vya bei: lazima kiwepo kinachoanzia idadi 1, na idadi isirudiwe.",
+      "invalid_rules": "Angalia vinywaji vya kifurushi: lazima kiwepo angalau kimoja, na kinywaji kisirudiwe.",
+      "in_use": "Hiki bado kinatumika, kwa hiyo hakiwezi kufutwa.",
+      "already_exists": "Jina hilo tayari linatumika.",
+      "invalid_setting": "Angalia namba: lazima ziwe namba kamili, amana isizidi 100 na siku zisizidi 365."
     }
   }
 }

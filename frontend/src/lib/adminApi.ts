@@ -159,6 +159,99 @@ export interface Calendar {
   days: CalendarDay[]
 }
 
+export interface Tier {
+  min_qty: number
+  unit_price: number
+}
+
+export interface ProductFields {
+  name_sw: string
+  name_en: string
+  category: string
+  unit: string
+  units_per_pack: number
+  is_alcohol: boolean
+  /** Null means no image. */
+  image_url: string | null
+  returnable_glass: boolean
+  empties_deposit_per_unit: number
+  active: boolean
+  /** Only in the owner's response. */
+  cost_price?: number
+}
+
+export interface AdminProduct extends ProductFields {
+  id: number
+  tiers: Tier[]
+}
+
+export interface PackageRule {
+  product_id: number
+  /** A decimal string with three places, as the API sends it. */
+  qty_per_guest: string
+  per_hour: boolean
+}
+
+export interface PackageFields {
+  slug: string
+  name_sw: string
+  name_en: string
+  description_sw: string
+  description_en: string
+  base_hours: number
+  sort_order: number
+  active: boolean
+}
+
+export interface AdminPackage extends PackageFields {
+  id: number
+  rules: PackageRule[]
+}
+
+export interface AddonFields {
+  name_sw: string
+  name_en: string
+  kind: string
+  price: number
+  /** Null means no limit. */
+  owned_capacity: number | null
+  active: boolean
+  /** Only in the owner's response. */
+  replacement_cost?: number
+}
+
+export interface AdminAddon extends AddonFields {
+  id: number
+}
+
+export interface AdminArea {
+  id: number
+  name: string
+  zone_id: number
+}
+
+export interface ZoneFields {
+  name: string
+  delivery_fee: number
+}
+
+export interface AdminZone extends ZoneFields {
+  id: number
+  areas: AdminArea[]
+}
+
+export interface VenueFields {
+  name: string
+  area_id: number
+  address: string
+}
+
+export interface AdminVenue extends VenueFields {
+  id: number
+}
+
+export type SettingsMap = Record<string, string>
+
 const send = (method: string, body?: unknown): RequestInit => ({
   method,
   body: body === undefined ? undefined : JSON.stringify(body),
@@ -202,6 +295,52 @@ export const rejectPayment = (paymentId: number) =>
 
 export const getCalendar = (from: string, to: string) =>
   api<Calendar>(`/admin/calendar?${new URLSearchParams({ from, to })}`)
+
+export const getProducts = () => api<AdminProduct[]>('/admin/products')
+export const createProduct = (body: ProductFields & { tiers: Tier[] }) =>
+  api<AdminProduct>('/admin/products', send('POST', body))
+export const patchProduct = (id: number, body: Partial<ProductFields>) =>
+  api<AdminProduct>(`/admin/products/${id}`, send('PATCH', body))
+export const putTiers = (id: number, tiers: Tier[]) =>
+  api<AdminProduct>(`/admin/products/${id}/tiers`, send('PUT', tiers))
+export const deleteProduct = (id: number) => api<void>(`/admin/products/${id}`, send('DELETE'))
+
+export const getPackages = () => api<AdminPackage[]>('/admin/packages')
+export const createPackage = (body: PackageFields & { rules: PackageRule[] }) =>
+  api<AdminPackage>('/admin/packages', send('POST', body))
+export const patchPackage = (id: number, body: Partial<PackageFields>) =>
+  api<AdminPackage>(`/admin/packages/${id}`, send('PATCH', body))
+export const putRules = (id: number, rules: PackageRule[]) =>
+  api<AdminPackage>(`/admin/packages/${id}/rules`, send('PUT', rules))
+export const deletePackage = (id: number) => api<void>(`/admin/packages/${id}`, send('DELETE'))
+
+export const getAddons = () => api<AdminAddon[]>('/admin/addons')
+export const createAddon = (body: AddonFields) => api<AdminAddon>('/admin/addons', send('POST', body))
+export const patchAddon = (id: number, body: Partial<AddonFields>) =>
+  api<AdminAddon>(`/admin/addons/${id}`, send('PATCH', body))
+export const deleteAddon = (id: number) => api<void>(`/admin/addons/${id}`, send('DELETE'))
+
+export const getZones = () => api<AdminZone[]>('/admin/zones')
+export const createZone = (body: ZoneFields) => api<AdminZone>('/admin/zones', send('POST', body))
+export const patchZone = (id: number, body: Partial<ZoneFields>) =>
+  api<AdminZone>(`/admin/zones/${id}`, send('PATCH', body))
+export const deleteZone = (id: number) => api<void>(`/admin/zones/${id}`, send('DELETE'))
+
+export const createArea = (body: { name: string; zone_id: number }) =>
+  api<AdminArea>('/admin/areas', send('POST', body))
+export const patchArea = (id: number, body: { name?: string; zone_id?: number }) =>
+  api<AdminArea>(`/admin/areas/${id}`, send('PATCH', body))
+export const deleteArea = (id: number) => api<void>(`/admin/areas/${id}`, send('DELETE'))
+
+export const getVenues = () => api<AdminVenue[]>('/admin/venues')
+export const createVenue = (body: VenueFields) => api<AdminVenue>('/admin/venues', send('POST', body))
+export const patchVenue = (id: number, body: Partial<VenueFields>) =>
+  api<AdminVenue>(`/admin/venues/${id}`, send('PATCH', body))
+export const deleteVenue = (id: number) => api<void>(`/admin/venues/${id}`, send('DELETE'))
+
+export const getSettings = () => api<SettingsMap>('/admin/settings')
+/** Send only the keys that changed; the answer is the full map. */
+export const putSettings = (changes: SettingsMap) => api<SettingsMap>('/admin/settings', send('PUT', changes))
 
 /** Date and time as they read in Dar es Salaam, wherever the browser is. */
 export function formatDateTime(iso: string, lang: string): string {

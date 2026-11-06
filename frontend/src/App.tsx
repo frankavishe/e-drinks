@@ -6,6 +6,8 @@ import BookingDetail from './pages/admin/BookingDetail'
 import BookingList from './pages/admin/BookingList'
 import Calendar from './pages/admin/Calendar'
 import Dashboard from './pages/admin/Dashboard'
+import Settings from './pages/admin/Settings'
+import ZonesVenues from './pages/admin/ZonesVenues'
 import BookingWizard from './pages/book/BookingWizard'
 import ComingSoon from './pages/ComingSoon'
 import Home from './pages/Home'
@@ -31,6 +33,8 @@ export default function App() {
             <Route path="bookings" element={<BookingList />} />
             <Route path="bookings/:id" element={<BookingDetail />} />
             <Route path="calendar" element={<Calendar />} />
+            <Route path="zones" element={<ZonesVenues />} />
+            <Route path="settings" element={<Settings />} />
             <Route path="*" element={<ComingSoon />} />
           </Route>
         </Routes>

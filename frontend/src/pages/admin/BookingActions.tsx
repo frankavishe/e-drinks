@@ -19,14 +19,10 @@ import {
 } from '../../lib/adminApi'
 import { formatTzs } from '../../lib/publicApi'
 import { AmountRow, Field, inputClass, Notice, primaryClass, secondaryClass } from '../book/ui'
-import { refusalKeys, useBookingAction } from './useBookingAction'
+import { Refusal } from './BookingRows'
+import { useBookingAction } from './useBookingAction'
 
 const REFUND_METHODS = ['mpesa', 'tigopesa', 'airtel', 'bank', 'cash']
-
-function Refusal({ error }: { error: unknown }) {
-  const { t } = useTranslation()
-  return error ? <Notice tone="problem">{t(refusalKeys(error))}</Notice> : null
-}
 
 export function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (

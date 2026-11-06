@@ -204,7 +204,9 @@
     "nav": {
       "dashboard": "Overview",
       "bookings": "Bookings",
-      "calendar": "Calendar"
+      "calendar": "Calendar",
+      "zones": "Zones and venues",
+      "settings": "Settings"
     },
     "calendar": {
       "month": "Month",
@@ -327,6 +329,63 @@
       "save": "Save records",
       "saved": "Saved."
     },
+    "manage": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteSure": "Delete {{name}}? This can't be undone.",
+      "deleteYes": "Yes, delete",
+      "save": "Save"
+    },
+    "zones": {
+      "zonesTitle": "Delivery zones",
+      "noZones": "No zones yet.",
+      "addZone": "Add zone",
+      "zoneName": "Zone name",
+      "fee": "Delivery fee (TSh)",
+      "areas": "Areas",
+      "noAreas": "No areas in this zone yet.",
+      "addArea": "Add area",
+      "areaName": "Area name",
+      "zone": "Zone",
+      "venuesTitle": "Saved venues",
+      "noVenues": "No saved venues yet.",
+      "addVenue": "Add venue",
+      "venueName": "Venue name",
+      "area": "Area",
+      "chooseArea": "Choose an area",
+      "address": "Address (optional)"
+    },
+    "settings": {
+      "readOnly": "Only the owner can change these.",
+      "save": "Save settings",
+      "saved": "Saved.",
+      "group": {
+        "business": "Business details",
+        "rules": "Booking rules",
+        "payment": "Payment details",
+        "policy": "Booking terms"
+      },
+      "field": {
+        "business_name": "Business name",
+        "tin": "TIN",
+        "vrn": "VRN",
+        "phone": "Phone number",
+        "email": "Email",
+        "notification_email": "Email for new booking alerts",
+        "whatsapp_number": "WhatsApp number",
+        "min_order": "Minimum order (TSh)",
+        "notice_days": "Notice needed (days)",
+        "notice_days_servers": "Notice needed with servers (days)",
+        "deposit_percent": "Deposit (%)",
+        "balance_due_days": "Balance due before the event (days)",
+        "mpesa_till": "M-Pesa till number",
+        "tigopesa_lipa": "Tigo Pesa Lipa number",
+        "airtel_lipa": "Airtel Money Lipa number",
+        "bank_details": "Bank details",
+        "policy_text_sw": "Booking terms in Swahili",
+        "policy_text_en": "Booking terms in English"
+      }
+    },
     "refusal": {
       "unknown": "That didn't go through. Check what you entered and try again.",
       "invalid_move": "A booking at this stage can't do that.",
@@ -350,7 +409,12 @@
       "not_provisional": "The delivery fee has already been set.",
       "already_confirmed": "This payment has already been confirmed.",
       "already_rejected": "This payment has already been rejected.",
-      "payment_needed_by_stage": "The booking's stage depends on this payment. The owner must move it back first."
+      "payment_needed_by_stage": "The booking's stage depends on this payment. The owner must move it back first.",
+      "invalid_tiers": "Check the price tiers: there must be one starting at quantity 1, and no quantity can repeat.",
+      "invalid_rules": "Check the package drinks: there must be at least one, and no drink can repeat.",
+      "in_use": "This is still in use, so it can't be deleted.",
+      "already_exists": "That name is already in use.",
+      "invalid_setting": "Check the numbers: they must be whole numbers, with the deposit at most 100 and day counts at most 365."
     }
   }
 }

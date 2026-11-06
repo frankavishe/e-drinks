@@ -10,6 +10,8 @@ const NAV = [
   ['/admin', 'admin.nav.dashboard', true],
   ['/admin/bookings', 'admin.nav.bookings', false],
   ['/admin/calendar', 'admin.nav.calendar', false],
+  ['/admin/zones', 'admin.nav.zones', false],
+  ['/admin/settings', 'admin.nav.settings', false],
 ] as const
 
 export default function AdminLayout() {
